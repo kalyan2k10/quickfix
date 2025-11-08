@@ -1,0 +1,36 @@
+/* Styles for the User Dashboard Map View */
+.map-view {
+    height: 450px;
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden; /* Ensures the map corners are rounded */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-container { height: 100%; }
+
+/* Spinner for waiting screen */
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #09f;
+    margin: 20px auto;
+    animation: spin 1s ease infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom class for permanent tooltips to make them more visible */
+.vendor-tooltip {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #777;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-weight: bold;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}

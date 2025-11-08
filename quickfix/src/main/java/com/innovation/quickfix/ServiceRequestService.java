@@ -1,0 +1,90 @@
+package com.innovation.quickfix;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ServiceRequestService {
+
+    private final ServiceRequestRepository requestRepository;
+    private final UserRepository userRepository;
+
+    public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository) {
+        this.requestRepository = requestRepository;
+        this.userRepository = userRepository;
+    }
+
+    public ServiceRequest createRequest(ServiceRequest request, Long vendorId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        request.setRequestingUser(user);
+        request.setStatus(RequestStatus.OPEN);
+
+        if (vendorId != null) {
+            User intendedVendor = userRepository.findById(vendorId)
+                    .orElseThrow(() -> new RuntimeException("Intended vendor not found"));
+            request.setIntendedVendor(intendedVendor);
+        }
+
+        return requestRepository.save(request);
+    }
+
+    public List<ServiceRequest> getOpenRequests() {
+        return requestRepository.findByStatus(RequestStatus.OPEN);
+    }
+
+    public Optional<ServiceRequest> getRequestById(Long id) {
+        return requestRepository.findById(id);
+    }
+
+    public Optional<ServiceRequest> updateRequestStatus(Long requestId, String status) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User vendor = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+
+        return requestRepository.findById(requestId)
+                .map(request -> {
+                    switch (status.toLowerCase()) {
+                        case "accept": {
+                            if (request.getStatus() != RequestStatus.OPEN) {
+                                throw new IllegalStateException("Request is not open for assignment.");
+                            }
+                            request.setAssignedVendor(vendor);
+                            request.setStatus(RequestStatus.ASSIGNED);
+                            break;
+                        }
+                        case "deny": {
+                            // This case can be expanded later if needed.
+                            // For now, we'll just handle accept.
+                            break;
+                        }
+                        default:
+                            throw new IllegalArgumentException("Invalid status: " + status);
+                    }
+                    return requestRepository.save(request);
+                });
+    }
+
+    public Optional<ServiceRequest> completeRequestByUser(Long requestId) {
+        // Get the currently authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return requestRepository.findById(requestId)
+                .map(request -> {
+                    // Ensure the request is assigned and the user completing it is the one who
+                    // requested it
+                    if (request.getStatus() != RequestStatus.ASSIGNED
+                            || request.getRequestingUser().getId() != user.getId()) {
+                        throw new IllegalStateException("Request cannot be completed by this user at this time.");
+                    }
+                    request.setStatus(RequestStatus.COMPLETED);
+                    return requestRepository.save(request);
+                });
+    }
+}
