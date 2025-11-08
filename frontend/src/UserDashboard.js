@@ -61,7 +61,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
   // Polling for live vendor location when assigned
   useEffect(() => {
-    if (activeRequest && activeRequest.status === 'ASSIGNED' && activeRequest.assignedVendor) {
+    if (activeRequest && activeRequest.status === 'ASSIGNED' && activeRequest.assignedVendor?.latitude && activeRequest.assignedVendor?.longitude) {
       const vendorId = activeRequest.assignedVendor.id;
       const interval = setInterval(() => {
         fetch(`/users/${vendorId}`, { headers: authHeaders }) // Fetch the vendor's updated user object

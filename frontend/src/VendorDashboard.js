@@ -47,43 +47,84 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
     return <div className="form-card"><h2>Loading your location and requests...</h2></div>;
   }
 
+  const assignedRequest = requests.find(req => req.status === 'ASSIGNED' && req.assignedVendor?.id === loggedInUser.id);
+  const openRequests = requests.filter(req => req.status === 'OPEN');
+
+  // == STATE: Vendor has an active, assigned request ==
+  if (assignedRequest) {
+    const userPosition = [assignedRequest.requestingUser.latitude, assignedRequest.requestingUser.longitude];
+    return (
+      <>
+        <div className="form-card">
+          <h2>Active Job: En Route to User</h2>
+          <p>You have accepted a request from <strong>@{assignedRequest.requestingUser.username}</strong>.</p>
+          <p>Issue: <strong>{assignedRequest.problemDescription}</strong></p>
+          <p><em>The user is tracking your location. Head to their position. The request will be marked as complete by the user upon service completion.</em></p>
+        </div>
+        <div className="user-list-section">
+          <h2>Job Location</h2>
+          <div className="map-view">
+            <MapContainer center={userPosition} zoom={13} scrollWheelZoom={false}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker position={vendorLocation} icon={vendorIcon}>
+                <Popup>Your current location</Popup>
+              </Marker>
+              <Marker position={userPosition} icon={userRequestIcon}>
+                <Popup>
+                  User: @{assignedRequest.requestingUser.username}<br />
+                  Problem: {assignedRequest.problemDescription}
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // == STATE: Vendor is available for new requests ==
   return (
-    <div className="user-list-section">
-      <h2>Incoming Service Requests</h2>
-      <div className="map-view">
-        <MapContainer center={vendorLocation} zoom={12} scrollWheelZoom={false}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {/* Vendor's own location */}
-          {vendorLocation && (
-            <Marker position={vendorLocation} icon={vendorIcon}>
-              <Popup>This is you!</Popup>
-            </Marker>
-          )}
-          {/* Markers for open requests */}
-          {requests.filter(req => req.status === 'OPEN').map(req => {
-            if (req.requestingUser.latitude && req.requestingUser.longitude) {
-              return (
-                <Marker key={req.id} position={[req.requestingUser.latitude, req.requestingUser.longitude]} icon={userRequestIcon}>
-                  <Popup>
-                    <strong>@{req.requestingUser.username}</strong><br />
-                    Problem: {req.problemDescription}<br />
-                    <div className="request-actions">
-                      <button onClick={() => handleAccept(req.id)}>Accept</button>
-                      {/* The 'deny' button is removed as the backend doesn't handle it yet */}
-                      {/* <button className="deny" onClick={() => onUpdateRequest(req.id, 'deny')}>Deny</button> */}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            }
-            return null; // Return null if the request has no location
-          })}
-        </MapContainer>
+    <>
+      <div className="user-list-section">
+        <h2>Incoming Service Requests</h2>
+        <div className="map-view">
+          <MapContainer center={vendorLocation} zoom={12} scrollWheelZoom={false}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {vendorLocation && (
+              <Marker position={vendorLocation} icon={vendorIcon}>
+                <Popup>This is you!</Popup>
+              </Marker>
+            )}
+            {openRequests.map(req => (
+              req.requestingUser.latitude && req.requestingUser.longitude && (
+                  <Marker key={req.id} position={[req.requestingUser.latitude, req.requestingUser.longitude]} icon={userRequestIcon}>
+                    <Popup>
+                      <strong>@{req.requestingUser.username}</strong><br />
+                      Problem: {req.problemDescription}<br />
+                      <div className="request-actions">
+                        <button onClick={() => handleAccept(req.id)}>Accept</button>
+                      </div>
+                    </Popup>
+                  </Marker>
+              )
+            ))}
+          </MapContainer>
+        </div>
       </div>
-    </div>
+      <div className="user-list-section">
+        <h2>Available Jobs ({openRequests.length})</h2>
+        {openRequests.length > 0 ? openRequests.map(req => (
+          <div key={req.id} className="user-card">
+            <p><strong>User:</strong> @{req.requestingUser.username}</p>
+            <p><strong>Problem:</strong> {req.problemDescription}</p>
+            <button className="accept" onClick={() => handleAccept(req.id)}>Accept Request</button>
+          </div>
+        )) : <p>No open service requests in your area right now. We'll notify you when a new one comes in.</p>}
+      </div>
+    </>
   );
 };
 

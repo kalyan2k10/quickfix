@@ -46,15 +46,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("ADMIN")
-                        // User-specific routes
-                        .requestMatchers(HttpMethod.POST, "/requests/**").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.POST, "/requests/*/complete_by_user").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.PUT, "/users/*/location").hasAuthority("USER")
                         // Vendor-specific routes
                         .requestMatchers(HttpMethod.POST, "/requests/*/accept").hasAuthority("VENDOR")
                         .requestMatchers(HttpMethod.POST, "/requests/*/deny").hasAuthority("VENDOR")
                         .requestMatchers(HttpMethod.PUT, "/users/*/live-location").hasAuthority("VENDOR")
                         .requestMatchers(HttpMethod.GET, "/requests").hasAuthority("VENDOR")
+                        // User-specific routes
+                        .requestMatchers(HttpMethod.POST, "/requests").hasAuthority("USER") // For creating requests
+                        .requestMatchers(HttpMethod.POST, "/requests/*/complete_by_user").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.PUT, "/users/*/location").hasAuthority("USER")
                         // Authenticated routes
                         .requestMatchers(HttpMethod.GET, "/users/me").authenticated() // Allow user to fetch their own
                                                                                       // data
