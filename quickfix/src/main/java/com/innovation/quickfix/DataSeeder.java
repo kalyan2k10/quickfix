@@ -67,8 +67,8 @@ public class DataSeeder implements CommandLineRunner {
             vendorUser.setPassword(passwordEncoder.encode("password"));
             vendorUser.setEmail("vendor2@example.com");
             vendorUser.setRoles(Set.of("VENDOR"));
-            vendorUser.setLatitude(12.9357); // Koramangala
-            vendorUser.setLongitude(77.6245);
+            vendorUser.setLatitude(12.9345); // Koramangala
+            vendorUser.setLongitude(77.6260);
             vendorUser.setAddress("Koramangala, Bangalore");
             userRepository.save(vendorUser);
         }
@@ -79,8 +79,8 @@ public class DataSeeder implements CommandLineRunner {
             vendorUser.setPassword(passwordEncoder.encode("password"));
             vendorUser.setEmail("vendor3@example.com");
             vendorUser.setRoles(Set.of("VENDOR"));
-            vendorUser.setLatitude(12.9700); // Whitefield
-            vendorUser.setLongitude(77.7500);
+            vendorUser.setLatitude(12.9780); // Marathahalli
+            vendorUser.setLongitude(77.6990);
             vendorUser.setAddress("Whitefield, Bangalore");
             userRepository.save(vendorUser);
         }

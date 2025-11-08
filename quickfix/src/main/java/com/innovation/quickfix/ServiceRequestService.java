@@ -16,7 +16,7 @@ public class ServiceRequestService {
         this.userRepository = userRepository;
     }
 
-    public ServiceRequest createRequest(ServiceRequest request, Long vendorId) {
+    public ServiceRequest createRequest(ServiceRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -24,16 +24,14 @@ public class ServiceRequestService {
         request.setRequestingUser(user);
         request.setStatus(RequestStatus.OPEN);
 
-        if (vendorId != null) {
-            User intendedVendor = userRepository.findById(vendorId)
-                    .orElseThrow(() -> new RuntimeException("Intended vendor not found"));
-            request.setIntendedVendor(intendedVendor);
-        }
-
         return requestRepository.save(request);
     }
 
     public List<ServiceRequest> getOpenRequests() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User vendor = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+
         return requestRepository.findByStatus(RequestStatus.OPEN);
     }
 
@@ -79,8 +77,8 @@ public class ServiceRequestService {
                 .map(request -> {
                     // Ensure the request is assigned and the user completing it is the one who
                     // requested it
-                    if (request.getStatus() != RequestStatus.ASSIGNED
-                            || request.getRequestingUser().getId() != user.getId()) {
+                    if (request.getStatus() != RequestStatus.ASSIGNED ||
+                            request.getRequestingUser().getId() != user.getId()) {
                         throw new IllegalStateException("Request cannot be completed by this user at this time.");
                     }
                     request.setStatus(RequestStatus.COMPLETED);

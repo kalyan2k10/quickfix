@@ -117,9 +117,9 @@ function App() {
       .catch(handleApiError);
   };
 
-  const handleRequestSubmit = (vendorId) => {
-    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
-    fetch(`/requests?vendorId=${vendorId}`, {
+  const handleRequestSubmit = () => {
+    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);    
+    fetch(`/requests`, {
       method: 'POST',
       headers: authHeaders,
       body: JSON.stringify(newRequest),
@@ -247,7 +247,7 @@ function App() {
         {error && <p className="error-message">{error}</p>}
         
         {loggedInUser.roles.includes('ADMIN') && <AdminDashboard users={users} newUser={newUser} onInputChange={handleInputChange} onUserSubmit={handleUserSubmit} />}
-        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} />}
+        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} />}
         {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} />}
       </main>
     </div>

@@ -18,9 +18,8 @@ public class ServiceRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ServiceRequest createRequest(@RequestBody ServiceRequest request,
-            @RequestParam(required = false) Long vendorId) {
-        return requestService.createRequest(request, vendorId);
+    public ServiceRequest createRequest(@RequestBody ServiceRequest request) {
+        return requestService.createRequest(request);
     }
 
     @GetMapping

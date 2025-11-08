@@ -161,28 +161,15 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
             onChange={onInputChange}
             required
           />
+          <button onClick={() => onRequestSubmit()} disabled={!newRequest.problemDescription} className="broadcast-button">
+            Broadcast Request to All Vendors
+          </button>
         </form>
       </div>
 
       <div className="user-list-section">
-        <h2>Choose an Available Vendor</h2>
-        <ul className="vendor-choice-list">
-          {vendorsWithDistances.length > 0 ? (
-            vendorsWithDistances.map(vendor => (
-              <li key={vendor.id} className="vendor-choice-item">
-                <div className="vendor-info">
-                  <strong>@{vendor.username}</strong>
-                  <span>{vendor.distance.toFixed(1)} km away</span>
-                </div>
-                <button onClick={() => onRequestSubmit(vendor.id)} disabled={!newRequest.problemDescription}>
-                  Request
-                </button>
-              </li>
-            ))
-          ) : (
-            <p>No vendors are currently available. Please try again later.</p>
-          )}
-        </ul>
+        <h2>Nearby Vendors</h2>
+        <p>Your service request will be broadcast to all available vendors in the area.</p>
       </div>
     </>
   );
