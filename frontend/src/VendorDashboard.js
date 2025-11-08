@@ -3,6 +3,7 @@ import './VendorDashboard.css';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import RoutingMachine from './RoutingMachine'; // Import the routing component
 
 const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders, fetchServiceRequests }) => {
   const [vendorLocation, setVendorLocation] = useState(null);
@@ -75,6 +76,7 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
                   Problem: {assignedRequest.problemDescription}
                 </Popup>
               </Marker>
+              <RoutingMachine start={vendorLocation} end={userPosition} />
             </MapContainer>
           </div>
         </div>

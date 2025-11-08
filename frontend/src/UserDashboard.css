@@ -34,3 +34,11 @@
     font-weight: bold;
     box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 }
+
+/* Styles for ETA info */
+.eta-info {
+    background-color: #f0f8ff;
+    border-left: 4px solid #007bff;
+    padding: 10px 15px;
+    margin: 15px 0;
+}

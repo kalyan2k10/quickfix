@@ -3,12 +3,14 @@ import './UserDashboard.css';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
+import RoutingMachine from './RoutingMachine';
 
 // A simple component for a loading spinner
 const Spinner = () => <div className="spinner"></div>;
 
 const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, nearestVendor, fare, distance, onCompleteRequest }) => {
   const [liveVendorLocation, setLiveVendorLocation] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
 
   // --- Icon setup ---
   // Fix for default marker icon issue with webpack
@@ -21,23 +23,19 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
   // Custom icons for user and vendors
   const userIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
+    iconUrl: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', // Human icon
+    iconSize: [35, 35],
+    iconAnchor: [17, 35],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    shadowSize: [41, 41],
   });
 
   const vendorIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    ...L.Icon.Default.prototype.options
-  });
-
-  const nearestVendorIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png', // Gold for nearest
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    ...L.Icon.Default.prototype.options
+    iconUrl: 'https://cdn-icons-png.flaticon.com/128/619/619127.png', // Car icon
+    iconSize: [35, 35],
+    iconAnchor: [17, 35],
+    popupAnchor: [1, -34],
   });
 
   // Polling effect to check request status
@@ -80,6 +78,11 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     }
   }, [activeRequest, authHeaders]);
 
+  const handleRouteFound = (summary) => {
+    // summary contains totalDistance (meters) and totalTime (seconds)
+    setRouteInfo(summary);
+  };
+
   if (!userLocation) {
     return <div className="form-card"><h2>Fetching your location to find nearby vendors...</h2></div>;
   }
@@ -108,6 +111,14 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         <div className="form-card">
           <h2>Vendor on the way!</h2>
           <p><strong>{assignedVendor.username}</strong> has accepted your request and is en route.</p>
+          {routeInfo && (
+            <div className="eta-info">
+              <p>
+                Estimated Arrival: <strong>{Math.round(routeInfo.totalTime / 60)} mins</strong>
+              </p>
+              <p>Distance: <strong>{(routeInfo.totalDistance / 1000).toFixed(2)} km</strong></p>
+            </div>
+          )}
           <div className="request-actions">
             <button className="complete" onClick={() => onCompleteRequest(activeRequest.id)}>Mark as Complete & Pay</button>
           </div>
@@ -125,6 +136,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               <Marker position={currentVendorPosition} icon={vendorIcon}>
                 <Popup>{assignedVendor.username} is here</Popup>
               </Marker>
+              <RoutingMachine start={userPosition} end={currentVendorPosition} onRouteFound={handleRouteFound} />
             </MapContainer>
           </div>
         </div>
@@ -169,7 +181,28 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
       <div className="user-list-section">
         <h2>Nearby Vendors</h2>
-        <p>Your service request will be broadcast to all available vendors in the area.</p>
+        <div className="map-view">
+            <MapContainer center={[userLocation.latitude, userLocation.longitude]} zoom={12} scrollWheelZoom={false}>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {/* User's Location */}
+              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
+                <Popup>You are here</Popup>
+              </Marker>
+              {/* Nearby Vendor Locations */}
+              {vendorsWithDistances.map(vendor => (
+                vendor.latitude && vendor.longitude && (
+                  <Marker key={vendor.id} position={[vendor.latitude, vendor.longitude]} icon={vendorIcon}>
+                    <Tooltip direction="top" offset={[0, -35]} opacity={1} permanent>
+                      {vendor.username}
+                    </Tooltip>
+                  </Marker>
+                )
+              ))}
+            </MapContainer>
+        </div>
       </div>
     </>
   );

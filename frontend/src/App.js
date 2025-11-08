@@ -110,7 +110,7 @@ function App() {
     .catch(handleApiError);
   };
 
-  const fetchServiceRequests = (authHeaders, vendorId) => {
+  const fetchServiceRequests = (authHeaders) => {
     fetch('/requests', { headers: authHeaders })
       .then(response => response.json())
       .then(setServiceRequests)
