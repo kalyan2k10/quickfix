@@ -136,7 +136,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               <Marker position={currentVendorPosition} icon={vendorIcon}>
                 <Popup>{assignedVendor.username} is here</Popup>
               </Marker>
-              <RoutingMachine start={userPosition} end={currentVendorPosition} onRouteFound={handleRouteFound} />
+              <RoutingMachine start={currentVendorPosition} end={userPosition} onRouteFound={handleRouteFound} />
             </MapContainer>
           </div>
         </div>
