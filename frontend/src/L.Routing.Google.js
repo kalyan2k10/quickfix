@@ -50,12 +50,23 @@ L.Routing.Google = L.Class.extend({
   _googleResultToLrm: function(result) {
     const route = result.routes[0];
     const leg = route.legs[0];
+    
+    // Google's API provides duration and duration_in_traffic.
+    // We prefer duration_in_traffic for a more accurate ETA.
+    // The value is in seconds.
+    const timeInSeconds = leg.duration_in_traffic ? leg.duration_in_traffic.value : leg.duration.value;
+
+    if (!timeInSeconds) {
+      console.warn("Google Directions API did not return a time for the route.", leg);
+    }
 
     return [{
       name: route.summary,
       summary: {
         totalDistance: leg.distance.value, // meters
-        totalTime: leg.duration_in_traffic ? leg.duration_in_traffic.value : leg.duration.value, // seconds
+        // Ensure totalTime is always a valid number.
+        // This is what the dashboard uses to calculate the ETA.
+        totalTime: timeInSeconds || 0,
       },
       coordinates: route.overview_path.map(p => L.latLng(p.lat(), p.lng())),
       instructions: [], // Instructions can be mapped here if needed

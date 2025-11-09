@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './UserDashboard.css';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker as LeafletMarker, Popup, Tooltip } from 'react-leaflet'; // Leaflet for initial map
 import L from 'leaflet';
-import RoutingMachine from './RoutingMachine';
+import { GoogleMap, useLoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api'; // Google Maps for tracking
 
 // A simple component for a loading spinner
 const Spinner = () => <div className="spinner"></div>;
@@ -11,6 +11,14 @@ const Spinner = () => <div className="spinner"></div>;
 const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, nearestVendor, fare, distance, onCompleteRequest }) => {
   const [liveVendorLocation, setLiveVendorLocation] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
+  const [directions, setDirections] = useState(null);
+  const [vehicleBearing, setVehicleBearing] = useState(0);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyDRDs9yP06U9Nj1L3IDoiEuOBlJiobl76o", // This key is compromised. Please replace it.
+    libraries: ["places"],
+  });
+
 
   // --- Icon setup ---
   // Fix for default marker icon issue with webpack
@@ -57,31 +65,77 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     }
   }, [activeRequest, authHeaders, setActiveRequest]);
 
-  // Polling for live vendor location when assigned
+  // This single effect now handles all logic for the 'ASSIGNED' state.
   useEffect(() => {
-    if (activeRequest && activeRequest.status === 'ASSIGNED' && activeRequest.assignedVendor?.latitude && activeRequest.assignedVendor?.longitude) {
+    if (activeRequest?.status === 'ASSIGNED' && activeRequest.assignedVendor) {
+      // 1. Set the initial vendor location immediately.
+      const initialVendorLoc = { latitude: activeRequest.assignedVendor.latitude, longitude: activeRequest.assignedVendor.longitude };
+      setLiveVendorLocation(initialVendorLoc);
+      
+      // 2. Start polling for live location updates.
       const vendorId = activeRequest.assignedVendor.id;
       const interval = setInterval(() => {
-        fetch(`/users/${vendorId}`, { headers: authHeaders }) // Fetch the vendor's updated user object
+        fetch(`/users/${vendorId}`, { headers: authHeaders })
           .then(res => res.json())
           .then(vendorData => {
             if (vendorData.latitude && vendorData.longitude) {
-              setLiveVendorLocation({ latitude: vendorData.latitude, longitude: vendorData.longitude });
+              const newLoc = { latitude: vendorData.latitude, longitude: vendorData.longitude };
+
+              // Calculate bearing for icon rotation
+              setLiveVendorLocation(prevLoc => {
+                if (prevLoc) {
+                  const bearing = window.google.maps.geometry.spherical.computeHeading(
+                    new window.google.maps.LatLng(prevLoc.latitude, prevLoc.longitude),
+                    new window.google.maps.LatLng(newLoc.latitude, newLoc.longitude)
+                  );
+                  setVehicleBearing(bearing);
+                }
+                return newLoc;
+              });
             }
           })
           .catch(console.error);
-      }, 3000); // Poll every 3 seconds for live location
-
+      }, 5000); // Poll every 5 seconds for live location
+      
+      // 3. Cleanup: Stop polling when the component unmounts or the request status changes.
       return () => clearInterval(interval);
     } else {
-      setLiveVendorLocation(null); // Clear live location if not assigned
+      // If request is no longer assigned, clear all tracking data.
+      setLiveVendorLocation(null);
+      setDirections(null);
+      setRouteInfo(null);
     }
   }, [activeRequest, authHeaders]);
 
-  const handleRouteFound = (summary) => {
-    // summary contains totalDistance (meters) and totalTime (seconds)
-    setRouteInfo(summary);
-  };
+  // Ref for the map instance to control it programmatically
+  const mapRef = React.useRef(null);
+
+  useEffect(() => {
+    // Trigger route calculation only when map is loaded and locations are valid
+    if (isLoaded && mapRef.current && activeRequest?.status === 'ASSIGNED' && userLocation && liveVendorLocation) {
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: new window.google.maps.LatLng(liveVendorLocation.latitude, liveVendorLocation.longitude),
+          destination: new window.google.maps.LatLng(userLocation.latitude, userLocation.longitude),
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            setDirections(result);
+            // Update routeInfo directly from the Google Directions result.
+            const leg = result.routes[0].legs[0];
+            setRouteInfo({
+              totalTime: leg.duration.value,
+              totalDistance: leg.distance.value,
+            });
+          } else {
+            console.error(`error fetching directions ${result}`);
+          } // Don't clear routeInfo on error, to avoid flickering.
+        }
+      );
+    }
+  }, [isLoaded, activeRequest?.status, userLocation, liveVendorLocation]);
 
   if (!userLocation) {
     return <div className="form-card"><h2>Fetching your location to find nearby vendors...</h2></div>;
@@ -104,7 +158,16 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   if (activeRequest && activeRequest.status === 'ASSIGNED') {
     const assignedVendor = activeRequest.assignedVendor;
     const userPosition = [userLocation.latitude, userLocation.longitude];
-    const currentVendorPosition = liveVendorLocation ? [liveVendorLocation.latitude, liveVendorLocation.longitude] : [assignedVendor.latitude, assignedVendor.longitude];
+    // Use liveVendorLocation if available, otherwise fall back to the initial location.
+    const currentVendorPosition = liveVendorLocation 
+      ? [liveVendorLocation.latitude, liveVendorLocation.longitude] 
+      : [assignedVendor.latitude, assignedVendor.longitude];
+
+    const mapCenter = {
+      lat: userLocation.latitude,
+      lng: userLocation.longitude
+    };
+
 
     return (
       <>
@@ -125,20 +188,51 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         </div>
         <div className="user-list-section">
           <h2>Live Tracking</h2>
-          <div className="map-view">
-            <MapContainer center={userPosition} zoom={13} scrollWheelZoom={false}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={userPosition} icon={userIcon}>
-                <Popup>You are here</Popup>
-              </Marker>
-              <Marker position={currentVendorPosition} icon={vendorIcon}>
-                <Popup>{assignedVendor.username} is here</Popup>
-              </Marker>
-              <RoutingMachine start={currentVendorPosition} end={userPosition} onRouteFound={handleRouteFound} />
-            </MapContainer>
-          </div>
+          {loadError && <div>Error loading maps</div>}
+          {!isLoaded && <div>Loading Map...</div>}
+          {isLoaded && (
+            <div className="map-view">
+              <GoogleMap
+                mapContainerClassName="map-view-container" // Ensure this class gives the map a height
+                center={mapCenter}
+                zoom={13}
+                onLoad={map => { mapRef.current = map; }} // Store map instance on load
+              >
+                {/* User's Marker */}
+                <Marker
+                  position={{ lat: userLocation.latitude, lng: userLocation.longitude }}
+                  title="Your Location"
+                  icon={{ 
+                    url: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', 
+                    scaledSize: new window.google.maps.Size(40, 40),
+                    anchor: new window.google.maps.Point(20, 20),
+                  }}
+                />
+                {/* Vendor's Marker */}
+                <Marker
+                  position={{ lat: currentVendorPosition[0], lng: currentVendorPosition[1] }}
+                  title={`Vendor: ${assignedVendor.username}`}
+                  icon={{ 
+                    path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    scale: 7,
+                    rotation: vehicleBearing,
+                    fillColor: "#007bff",
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: "white",
+                    anchor: new window.google.maps.Point(0, 2.5),
+                  }}
+                />
+                {/* Directions/Route */}
+                {directions && (
+                  <DirectionsRenderer
+                    directions={directions}
+                    options={{ suppressMarkers: true, preserveViewport: true }} // Markers are handled above
+                  />
+                )}
+              </GoogleMap>
+            </div>
+          )}
         </div>
       </>
     );
@@ -182,23 +276,23 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
       <div className="user-list-section">
         <h2>Nearby Vendors</h2>
         <div className="map-view">
-            <MapContainer center={[userLocation.latitude, userLocation.longitude]} zoom={12} scrollWheelZoom={false}>
+            <MapContainer center={[userLocation.latitude, userLocation.longitude]} zoom={12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {/* User's Location */}
-              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
+              <LeafletMarker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
                 <Popup>You are here</Popup>
-              </Marker>
+              </LeafletMarker>
               {/* Nearby Vendor Locations */}
               {vendorsWithDistances.map(vendor => (
                 vendor.latitude && vendor.longitude && (
-                  <Marker key={vendor.id} position={[vendor.latitude, vendor.longitude]} icon={vendorIcon}>
+                  <LeafletMarker key={vendor.id} position={[vendor.latitude, vendor.longitude]} icon={vendorIcon}>
                     <Tooltip direction="top" offset={[0, -35]} opacity={1} permanent>
                       {vendor.username}
                     </Tooltip>
-                  </Marker>
+                  </LeafletMarker>
                 )
               ))}
             </MapContainer>

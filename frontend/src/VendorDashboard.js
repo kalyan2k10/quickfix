@@ -40,6 +40,38 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
     return () => clearInterval(interval);
   }, [authHeaders, fetchServiceRequests]);
 
+  // Effect for live location tracking of the vendor
+  useEffect(() => {
+    let locationWatcherId = null;
+
+    // Start watching location only when the vendor is logged in
+    if (loggedInUser) {
+      locationWatcherId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const newLocation = [latitude, longitude];
+
+          // Update local state for immediate feedback on the vendor's map
+          setVendorLocation(newLocation);
+
+          // Send the new location to the backend
+          fetch(`/users/${loggedInUser.id}/live-location`, {
+            method: 'PUT',
+            headers: authHeaders,
+            body: JSON.stringify({ latitude, longitude }),
+          }).catch(err => console.error("Failed to send live location:", err));
+        },
+        (error) => console.error("Geolocation error:", error),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // Options for better accuracy
+      );
+    }
+
+    // Cleanup: stop watching when the component unmounts
+    return () => {
+      if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
+    };
+  }, [loggedInUser, authHeaders]);
+
   const handleAccept = (requestId) => {
     onUpdateRequest(requestId, 'accept');
   };
@@ -54,12 +86,23 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
   // == STATE: Vendor has an active, assigned request ==
   if (assignedRequest) {
     const userPosition = [assignedRequest.requestingUser.latitude, assignedRequest.requestingUser.longitude];
+
+    // Function to open Google Maps for navigation
+    const handleStartNavigation = () => {
+      const origin = `${vendorLocation[0]},${vendorLocation[1]}`;
+      const destination = `${userPosition[0]},${userPosition[1]}`;
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+      window.open(googleMapsUrl, '_blank');
+    };
+
     return (
       <>
         <div className="form-card">
           <h2>Active Job: En Route to User</h2>
           <p>You have accepted a request from <strong>@{assignedRequest.requestingUser.username}</strong>.</p>
           <p>Issue: <strong>{assignedRequest.problemDescription}</strong></p>
+          {/* Add the navigation button here */}
+          <button className="accept" onClick={handleStartNavigation}>Start Navigation in Google Maps</button>
           <p><em>The user is tracking your location. Head to their position. The request will be marked as complete by the user upon service completion.</em></p>
         </div>
         <div className="user-list-section">
