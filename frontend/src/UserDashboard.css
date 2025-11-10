@@ -8,8 +8,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.leaflet-container { height: 100%; }
-
 /* This is the missing piece: Give the Google Map container a height */
 .map-view-container {
   width: 100%;

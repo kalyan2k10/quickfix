@@ -1,50 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import './UserDashboard.css';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker as LeafletMarker, Popup, Tooltip } from 'react-leaflet'; // Leaflet for initial map
-import L from 'leaflet';
-import { GoogleMap, useLoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api'; // Google Maps for tracking
+import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api'; // Google Maps for all map views
 
 // A simple component for a loading spinner
 const Spinner = () => <div className="spinner"></div>;
 
-const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, nearestVendor, fare, distance, onCompleteRequest }) => {
+const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, onCompleteRequest, isLoaded, loadError }) => {
   const [liveVendorLocation, setLiveVendorLocation] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [directions, setDirections] = useState(null);
   const [vehicleBearing, setVehicleBearing] = useState(0);
 
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyDRDs9yP06U9Nj1L3IDoiEuOBlJiobl76o", // This key is compromised. Please replace it.
-    libraries: ["places"],
-  });
+  // Custom Google Maps Icons
+  const userIcon = {
+    url: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', // Human icon
+    scaledSize: new window.google.maps.Size(40, 40),
+    anchor: new window.google.maps.Point(20, 20),
+  };
 
-
-  // --- Icon setup ---
-  // Fix for default marker icon issue with webpack
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-    iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-  });
-
-  // Custom icons for user and vendors
-  const userIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', // Human icon
-    iconSize: [35, 35],
-    iconAnchor: [17, 35],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    shadowSize: [41, 41],
-  });
-
-  const vendorIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/128/619/619127.png', // Car icon
-    iconSize: [35, 35],
-    iconAnchor: [17, 35],
-    popupAnchor: [1, -34],
-  });
+  const vendorIcon = {
+    url: 'https://cdn-icons-png.flaticon.com/128/619/619127.png', // Car icon
+    scaledSize: new window.google.maps.Size(40, 40),
+    anchor: new window.google.maps.Point(20, 20),
+  };
 
   // Polling effect to check request status
   useEffect(() => {
@@ -131,7 +109,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
             });
           } else {
             console.error(`error fetching directions ${result}`);
-          } // Don't clear routeInfo on error, to avoid flickering.
+            // Clear route info on error to prevent displaying stale data.
+            setDirections(null);
+            setRouteInfo(null);
+          }
         }
       );
     }
@@ -141,18 +122,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     return <div className="form-card"><h2>Fetching your location to find nearby vendors...</h2></div>;
   }
 
-  // == STATE 2: Waiting for Vendor Confirmation ==
-  if (activeRequest && activeRequest.status === 'OPEN') {
-    return (
-      <div className="form-card">
-        <h2>Waiting for Vendor Confirmation</h2>
-        <p>Your request for "<strong>{activeRequest.problemDescription}</strong>" has been sent.</p>
-        <p>We are finding a nearby vendor for you...</p>
-        <Spinner />
-        <p><em>You will be automatically updated once a vendor accepts.</em></p>
-      </div>
-    );
-  }
+  const mapCenter = userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore if no location
 
   // == STATE 3: Vendor Assigned, Live Tracking ==
   if (activeRequest && activeRequest.status === 'ASSIGNED') {
@@ -162,12 +132,6 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     const currentVendorPosition = liveVendorLocation 
       ? [liveVendorLocation.latitude, liveVendorLocation.longitude] 
       : [assignedVendor.latitude, assignedVendor.longitude];
-
-    const mapCenter = {
-      lat: userLocation.latitude,
-      lng: userLocation.longitude
-    };
-
 
     return (
       <>
@@ -194,7 +158,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
             <div className="map-view">
               <GoogleMap
                 mapContainerClassName="map-view-container" // Ensure this class gives the map a height
-                center={mapCenter}
+                center={{ lat: userLocation.latitude, lng: userLocation.longitude }}
                 zoom={13}
                 onLoad={map => { mapRef.current = map; }} // Store map instance on load
               >
@@ -202,11 +166,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                 <Marker
                   position={{ lat: userLocation.latitude, lng: userLocation.longitude }}
                   title="Your Location"
-                  icon={{ 
-                    url: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', 
-                    scaledSize: new window.google.maps.Size(40, 40),
-                    anchor: new window.google.maps.Point(20, 20),
-                  }}
+                  icon={userIcon}
                 />
                 {/* Vendor's Marker */}
                 <Marker
@@ -237,6 +197,20 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
       </>
     );
   }
+
+  // == STATE 2: Waiting for Vendor Confirmation ==
+  if (activeRequest && activeRequest.status === 'OPEN') {
+    return (
+      <div className="form-card">
+        <h2>Waiting for Vendor Confirmation</h2>
+        <p>Your request for "<strong>{activeRequest.problemDescription}</strong>" has been sent.</p>
+        <p>We are finding a nearby vendor for you...</p>
+        <Spinner />
+        <p><em>You will be automatically updated once a vendor accepts.</em></p>
+      </div>
+    );
+  }
+
 
   // == STATE 4: Request Completed ==
   if (activeRequest && activeRequest.status === 'COMPLETED') {
@@ -275,28 +249,32 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
       <div className="user-list-section">
         <h2>Nearby Vendors</h2>
-        <div className="map-view">
-            <MapContainer center={[userLocation.latitude, userLocation.longitude]} zoom={12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {/* User's Location */}
-              <LeafletMarker position={[userLocation.latitude, userLocation.longitude]} icon={userIcon}>
-                <Popup>You are here</Popup>
-              </LeafletMarker>
-              {/* Nearby Vendor Locations */}
-              {vendorsWithDistances.map(vendor => (
-                vendor.latitude && vendor.longitude && (
-                  <LeafletMarker key={vendor.id} position={[vendor.latitude, vendor.longitude]} icon={vendorIcon}>
-                    <Tooltip direction="top" offset={[0, -35]} opacity={1} permanent>
-                      {vendor.username}
-                    </Tooltip>
-                  </LeafletMarker>
-                )
-              ))}
-            </MapContainer>
-        </div>
+        {loadError && <div>Error loading maps</div>}
+        {!isLoaded && <div>Loading Map...</div>}
+        {isLoaded && (
+          <div className="map-view">
+              <GoogleMap
+                mapContainerClassName="map-view-container"
+                center={mapCenter}
+                zoom={12}
+              >
+                {/* User's Location */}
+                <Marker position={mapCenter} icon={userIcon} title="You are here" />
+
+                {/* Nearby Vendor Locations */}
+                {vendorsWithDistances.map(vendor => (
+                  vendor.latitude && vendor.longitude && (
+                    <Marker 
+                      key={vendor.id} 
+                      position={{ lat: vendor.latitude, lng: vendor.longitude }} 
+                      icon={vendorIcon}
+                      title={vendor.username}
+                    />
+                  )
+                ))}
+              </GoogleMap>
+          </div>
+        )}
       </div>
     </>
   );

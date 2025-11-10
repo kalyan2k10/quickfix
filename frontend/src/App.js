@@ -4,6 +4,7 @@ import AdminDashboard from './AdminDashboard';
 import VendorDashboard from './VendorDashboard';
 import UserDashboard from './UserDashboard';
 import Login from './Login';
+import { useLoadScript } from '@react-google-maps/api';
 
 
 function App() {
@@ -21,6 +22,22 @@ function App() {
   const [distance, setDistance] = useState(null);
   const [fare, setFare] = useState(null);
   const [vendorsWithDistances, setVendorsWithDistances] = useState([]);
+
+  // Centralized Google Maps script loading
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyDRDs9yP06U9Nj1L3IDoiEuOBlJiobl76o", // As requested, using the provided key
+    libraries: ["places", "directions", "geometry"], // Load all necessary libraries
+  });
+
+  // Placed outside the component to ensure it's a stable function reference
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
 
   const createAuthHeaders = (user, pass) => ({
     'Authorization': 'Basic ' + btoa(`${user}:${pass}`),
@@ -177,16 +194,6 @@ function App() {
       let minDistance = Infinity;
       const allVendorsWithDist = [];
 
-      // Single, reliable getDistance function
-      const getDistance = (lat1, lon1, lat2, lon2) => {
-        const R = 6371; // Radius of the Earth in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in km
-      };
-
       vendors.forEach(vendor => {
         if (vendor.latitude && vendor.longitude) {
           const dist = getDistance(userLocation.latitude, userLocation.longitude, vendor.latitude, vendor.longitude);
@@ -247,8 +254,8 @@ function App() {
         {error && <p className="error-message">{error}</p>}
         
         {loggedInUser.roles.includes('ADMIN') && <AdminDashboard users={users} newUser={newUser} onInputChange={handleInputChange} onUserSubmit={handleUserSubmit} />}
-        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} />}
-        {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} />}
+        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
+        {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
       </main>
     </div>
   );

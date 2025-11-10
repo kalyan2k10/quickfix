@@ -50,39 +50,51 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (userRepository.findByUsername("vendor1").isEmpty()) {
-            User vendorUser = new User();
-            vendorUser.setUsername("vendor1");
-            vendorUser.setPassword(passwordEncoder.encode("password"));
-            vendorUser.setEmail("vendor1@example.com");
-            vendorUser.setRoles(Set.of("VENDOR"));
-            vendorUser.setLatitude(12.9293);
-            vendorUser.setLongitude(77.5825);
-            vendorUser.setAddress("Jayanagar, Bangalore");
-            userRepository.save(vendorUser);
+            User vendor1 = new User();
+            vendor1.setUsername("vendor1");
+            vendor1.setPassword(passwordEncoder.encode("password"));
+            vendor1.setEmail("vendor1@example.com");
+            vendor1.setRoles(Set.of("VENDOR"));
+            vendor1.setLatitude(12.9293); // Jayanagar
+            vendor1.setLongitude(77.5825);
+            vendor1.setAddress("Jayanagar, Bangalore");
+            userRepository.save(vendor1);
         }
 
         if (userRepository.findByUsername("vendor2").isEmpty()) {
-            User vendorUser = new User();
-            vendorUser.setUsername("vendor2");
-            vendorUser.setPassword(passwordEncoder.encode("password"));
-            vendorUser.setEmail("vendor2@example.com");
-            vendorUser.setRoles(Set.of("VENDOR"));
-            vendorUser.setLatitude(12.9345); // Koramangala
-            vendorUser.setLongitude(77.6260);
-            vendorUser.setAddress("Koramangala, Bangalore");
-            userRepository.save(vendorUser);
+            User vendor2 = new User();
+            vendor2.setUsername("vendor2");
+            vendor2.setPassword(passwordEncoder.encode("password"));
+            vendor2.setEmail("vendor2@example.com");
+            vendor2.setRoles(Set.of("VENDOR"));
+            vendor2.setLatitude(12.9345); // Koramangala
+            vendor2.setLongitude(77.6260);
+            vendor2.setAddress("Koramangala, Bangalore");
+            userRepository.save(vendor2);
         }
 
         if (userRepository.findByUsername("vendor3").isEmpty()) {
-            User vendorUser = new User();
-            vendorUser.setUsername("vendor3");
-            vendorUser.setPassword(passwordEncoder.encode("password"));
-            vendorUser.setEmail("vendor3@example.com");
-            vendorUser.setRoles(Set.of("VENDOR"));
-            vendorUser.setLatitude(12.9780); // Marathahalli
-            vendorUser.setLongitude(77.6990);
-            vendorUser.setAddress("Whitefield, Bangalore");
-            userRepository.save(vendorUser);
+            User vendor3 = new User();
+            vendor3.setUsername("vendor3");
+            vendor3.setPassword(passwordEncoder.encode("password"));
+            vendor3.setEmail("vendor3@example.com");
+            vendor3.setRoles(Set.of("VENDOR"));
+            vendor3.setLatitude(12.9569); // Marathahalli
+            vendor3.setLongitude(77.7011);
+            vendor3.setAddress("Marathahalli, Bangalore");
+            userRepository.save(vendor3);
+        }
+
+        if (userRepository.findByUsername("vendor4").isEmpty()) {
+            User vendor4 = new User();
+            vendor4.setUsername("vendor4");
+            vendor4.setPassword(passwordEncoder.encode("password"));
+            vendor4.setEmail("vendor4@example.com");
+            vendor4.setRoles(Set.of("VENDOR"));
+            vendor4.setLatitude(12.9767); // Majestic
+            vendor4.setLongitude(77.5713);
+            vendor4.setAddress("Majestic, Bangalore");
+            userRepository.save(vendor4);
         }
     }
 }

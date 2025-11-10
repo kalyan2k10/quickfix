@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import './VendorDashboard.css';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import RoutingMachine from './RoutingMachine'; // Import the routing component
+import { GoogleMap, Marker, DirectionsRenderer, InfoWindow } from '@react-google-maps/api';
 
-const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders, fetchServiceRequests }) => {
+const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders, fetchServiceRequests, isLoaded, loadError }) => {
   const [vendorLocation, setVendorLocation] = useState(null);
+  const [directions, setDirections] = useState(null);
+  const [activeInfoWindow, setActiveInfoWindow] = useState(null); // To show one popup at a time
 
   // Custom icons
-  const userRequestIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    ...L.Icon.Default.prototype.options
-  });
+  const userRequestIcon = {
+    url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    scaledSize: new window.google.maps.Size(25, 41),
+    anchor: new window.google.maps.Point(12, 41),
+  };
 
-  const vendorIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    ...L.Icon.Default.prototype.options
-  });
+  const vendorIcon = {
+    url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    scaledSize: new window.google.maps.Size(25, 41),
+    anchor: new window.google.maps.Point(12, 41),
+  };
 
   useEffect(() => {
     if (loggedInUser && loggedInUser.latitude && loggedInUser.longitude) {
@@ -76,12 +77,36 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
     onUpdateRequest(requestId, 'accept');
   };
 
+  // Effect to calculate route for assigned request
+  useEffect(() => {
+    const assignedRequest = requests.find(req => req.status === 'ASSIGNED' && req.assignedVendor?.id === loggedInUser.id);
+    if (isLoaded && assignedRequest && vendorLocation) {
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route(
+        {
+          origin: new window.google.maps.LatLng(vendorLocation[0], vendorLocation[1]),
+          destination: new window.google.maps.LatLng(assignedRequest.requestingUser.latitude, assignedRequest.requestingUser.longitude),
+          travelMode: window.google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === window.google.maps.DirectionsStatus.OK) {
+            setDirections(result);
+          } else {
+            console.error(`error fetching directions ${result}`);
+            setDirections(null);
+          }
+        }
+      );
+    } else {
+      setDirections(null); // Clear directions if no longer assigned
+    }
+  }, [isLoaded, requests, vendorLocation, loggedInUser.id]);
+
   if (!vendorLocation) {
     return <div className="form-card"><h2>Loading your location and requests...</h2></div>;
   }
 
   const assignedRequest = requests.find(req => req.status === 'ASSIGNED' && req.assignedVendor?.id === loggedInUser.id);
-  const openRequests = requests.filter(req => req.status === 'OPEN');
 
   // == STATE: Vendor has an active, assigned request ==
   if (assignedRequest) {
@@ -107,21 +132,28 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
         </div>
         <div className="user-list-section">
           <h2>Job Location</h2>
-          <div className="map-view">
-            <MapContainer center={userPosition} zoom={13} scrollWheelZoom={false}>
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={vendorLocation} icon={vendorIcon}>
-                <Popup>Your current location</Popup>
-              </Marker>
-              <Marker position={userPosition} icon={userRequestIcon}>
-                <Popup>
-                  User: @{assignedRequest.requestingUser.username}<br />
-                  Problem: {assignedRequest.problemDescription}
-                </Popup>
-              </Marker>
-              <RoutingMachine start={vendorLocation} end={userPosition} />
-            </MapContainer>
-          </div>
+          {loadError && <div>Error loading maps</div>}
+          {!isLoaded && <div>Loading Map...</div>}
+          {isLoaded && (
+            <div className="map-view">
+              <GoogleMap
+                mapContainerClassName="map-view-container"
+                center={{ lat: userPosition[0], lng: userPosition[1] }}
+                zoom={13}
+              >
+                {/* We don't need markers here because DirectionsRenderer will show them */}
+                {directions && (
+                  <DirectionsRenderer
+                    directions={directions}
+                    options={{
+                      suppressMarkers: false, // Show default A/B markers
+                      polylineOptions: { strokeColor: "#007bff", strokeWeight: 6 },
+                    }}
+                  />
+                )}
+              </GoogleMap>
+            </div>
+          )}
         </div>
       </>
     );
@@ -132,34 +164,48 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
     <>
       <div className="user-list-section">
         <h2>Incoming Service Requests</h2>
-        <div className="map-view">
-          <MapContainer center={vendorLocation} zoom={12} scrollWheelZoom={false}>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {vendorLocation && (
-              <Marker position={vendorLocation} icon={vendorIcon}>
-                <Popup>This is you!</Popup>
-              </Marker>
-            )}
-            {openRequests.map(req => (
-              req.requestingUser.latitude && req.requestingUser.longitude && (
-                  <Marker key={req.id} position={[req.requestingUser.latitude, req.requestingUser.longitude]} icon={userRequestIcon}>
-                    <Popup>
-                      <strong>@{req.requestingUser.username}</strong><br />
-                      Problem: {req.problemDescription}<br />
-                      <div className="request-actions">
-                        <button onClick={() => handleAccept(req.id)}>Accept</button>
-                      </div>
-                    </Popup>
-                  </Marker>
-              )
-            ))}
-          </MapContainer>
-        </div>
+        {loadError && <div>Error loading maps</div>}
+        {!isLoaded && <div>Loading Map...</div>}
+        {isLoaded && (
+          <div className="map-view">
+            <GoogleMap
+              mapContainerClassName="map-view-container"
+              center={{ lat: vendorLocation[0], lng: vendorLocation[1] }}
+              zoom={12}
+            >
+              <Marker position={{ lat: vendorLocation[0], lng: vendorLocation[1] }} icon={vendorIcon} title="This is you!" />
+              
+              {requests.filter(req => req.status === 'OPEN').map(req => (
+                req.requestingUser.latitude && req.requestingUser.longitude && (
+                    <Marker 
+                      key={req.id} 
+                      position={{ lat: req.requestingUser.latitude, lng: req.requestingUser.longitude }} 
+                      icon={userRequestIcon}
+                      onClick={() => setActiveInfoWindow(req.id)}
+                    >
+                      {activeInfoWindow === req.id && (
+                        <InfoWindow onCloseClick={() => setActiveInfoWindow(null)}>
+                          <div>
+                            <strong>@{req.requestingUser.username}</strong><br />
+                            Problem: {req.problemDescription}<br />
+                            <div className="request-actions">
+                              <button className="accept" onClick={() => handleAccept(req.id)}>Accept</button>
+                            </div>
+                          </div>
+                        </InfoWindow>
+                      )}
+                    </Marker>
+                )
+              ))}
+            </GoogleMap>
+          </div>
+        )}
       </div>
       <div className="user-list-section">
+        {(() => {
+          const openRequests = requests.filter(req => req.status === 'OPEN');
+          return (
+            <>
         <h2>Available Jobs ({openRequests.length})</h2>
         {openRequests.length > 0 ? openRequests.map(req => (
           <div key={req.id} className="user-card">
@@ -168,6 +214,9 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
             <button className="accept" onClick={() => handleAccept(req.id)}>Accept Request</button>
           </div>
         )) : <p>No open service requests in your area right now. We'll notify you when a new one comes in.</p>}
+            </>
+          );
+        })()}
       </div>
     </>
   );
