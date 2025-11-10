@@ -26,33 +26,27 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
     }
   }, [loggedInUser]);
 
-  // Fetch requests on initial mount
+  // Poll for new requests every 2 seconds
   useEffect(() => {
-    fetchServiceRequests(authHeaders);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const assignedRequest = requests.find(req => req.status === 'ASSIGNED' && req.assignedVendor?.id === loggedInUser.id);
+    if (!assignedRequest) {
+      const interval = setInterval(() => {
+        fetchServiceRequests(authHeaders);
+      }, 5000); // Poll every 5 seconds
 
-  // Poll for new requests every 5 seconds if no request is currently accepted
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchServiceRequests(authHeaders);
-    }, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    }
   }, [authHeaders, fetchServiceRequests]);
 
   // Effect for live location tracking of the vendor
   useEffect(() => {
     let locationWatcherId = null;
 
-    // Start watching location only when the vendor is logged in
     if (loggedInUser) {
       locationWatcherId = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const newLocation = [latitude, longitude];
-
-          // Update local state for immediate feedback on the vendor's map
           setVendorLocation(newLocation);
 
           // Send the new location to the backend
@@ -63,11 +57,10 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
           }).catch(err => console.error("Failed to send live location:", err));
         },
         (error) => console.error("Geolocation error:", error),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // Options for better accuracy
+        { enableHighAccuracy: true }
       );
     }
 
-    // Cleanup: stop watching when the component unmounts
     return () => {
       if (locationWatcherId) navigator.geolocation.clearWatch(locationWatcherId);
     };
@@ -112,7 +105,6 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
   if (assignedRequest) {
     const userPosition = [assignedRequest.requestingUser.latitude, assignedRequest.requestingUser.longitude];
 
-    // Function to open Google Maps for navigation
     const handleStartNavigation = () => {
       const origin = `${vendorLocation[0]},${vendorLocation[1]}`;
       const destination = `${userPosition[0]},${userPosition[1]}`;
@@ -126,31 +118,15 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
           <h2>Active Job: En Route to User</h2>
           <p>You have accepted a request from <strong>@{assignedRequest.requestingUser.username}</strong>.</p>
           <p>Issue: <strong>{assignedRequest.problemDescription}</strong></p>
-          {/* Add the navigation button here */}
-          <button className="accept" onClick={handleStartNavigation}>Start Navigation in Google Maps</button>
-          <p><em>The user is tracking your location. Head to their position. The request will be marked as complete by the user upon service completion.</em></p>
+          <button className="accept" onClick={handleStartNavigation}>Start Navigation</button>
+          <p><em>The user is tracking your location. Head to their position.</em></p>
         </div>
         <div className="user-list-section">
           <h2>Job Location</h2>
-          {loadError && <div>Error loading maps</div>}
-          {!isLoaded && <div>Loading Map...</div>}
           {isLoaded && (
             <div className="map-view">
-              <GoogleMap
-                mapContainerClassName="map-view-container"
-                center={{ lat: userPosition[0], lng: userPosition[1] }}
-                zoom={13}
-              >
-                {/* We don't need markers here because DirectionsRenderer will show them */}
-                {directions && (
-                  <DirectionsRenderer
-                    directions={directions}
-                    options={{
-                      suppressMarkers: false, // Show default A/B markers
-                      polylineOptions: { strokeColor: "#007bff", strokeWeight: 6 },
-                    }}
-                  />
-                )}
+              <GoogleMap mapContainerClassName="map-view-container" center={{ lat: userPosition[0], lng: userPosition[1] }} zoom={13}>
+                {directions && <DirectionsRenderer directions={directions} />}
               </GoogleMap>
             </div>
           )}
@@ -160,29 +136,19 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
   }
 
   // == STATE: Vendor is available for new requests ==
+  const openRequests = requests.filter(req => req.status === 'OPEN');
   return (
     <>
       <div className="user-list-section">
         <h2>Incoming Service Requests</h2>
-        {loadError && <div>Error loading maps</div>}
-        {!isLoaded && <div>Loading Map...</div>}
         {isLoaded && (
           <div className="map-view">
-            <GoogleMap
-              mapContainerClassName="map-view-container"
-              center={{ lat: vendorLocation[0], lng: vendorLocation[1] }}
-              zoom={12}
-            >
+            <GoogleMap mapContainerClassName="map-view-container" center={{ lat: vendorLocation[0], lng: vendorLocation[1] }} zoom={12}>
               <Marker position={{ lat: vendorLocation[0], lng: vendorLocation[1] }} icon={vendorIcon} title="This is you!" />
               
-              {requests.filter(req => req.status === 'OPEN').map(req => (
+              {openRequests.map(req => (
                 req.requestingUser.latitude && req.requestingUser.longitude && (
-                    <Marker 
-                      key={req.id} 
-                      position={{ lat: req.requestingUser.latitude, lng: req.requestingUser.longitude }} 
-                      icon={userRequestIcon}
-                      onClick={() => setActiveInfoWindow(req.id)}
-                    >
+                    <Marker key={req.id} position={{ lat: req.requestingUser.latitude, lng: req.requestingUser.longitude }} icon={userRequestIcon} onClick={() => setActiveInfoWindow(req.id)}>
                       {activeInfoWindow === req.id && (
                         <InfoWindow onCloseClick={() => setActiveInfoWindow(null)}>
                           <div>
@@ -202,10 +168,6 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
         )}
       </div>
       <div className="user-list-section">
-        {(() => {
-          const openRequests = requests.filter(req => req.status === 'OPEN');
-          return (
-            <>
         <h2>Available Jobs ({openRequests.length})</h2>
         {openRequests.length > 0 ? openRequests.map(req => (
           <div key={req.id} className="user-card">
@@ -213,10 +175,7 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
             <p><strong>Problem:</strong> {req.problemDescription}</p>
             <button className="accept" onClick={() => handleAccept(req.id)}>Accept Request</button>
           </div>
-        )) : <p>No open service requests in your area right now. We'll notify you when a new one comes in.</p>}
-            </>
-          );
-        })()}
+        )) : <p>No open service requests in your area right now.</p>}
       </div>
     </>
   );
