@@ -75,6 +75,17 @@ function App() {
         } else if (currentUser.roles.includes('USER')) {
           // User needs the list of vendors
           fetch('/users/vendors', { headers: authHeaders }).then(res => res.json()).then(setVendors);
+          // Check for any of the user's requests to restore state
+          fetch('/requests/my-requests', { headers: authHeaders })
+            .then(res => {
+              if (res.status === 200) return res.json();
+              return []; // No requests found
+            })
+            .then(myRequests => {
+              // Find the most recent request that is not completed
+              const latestActiveRequest = myRequests.sort((a, b) => b.id - a.id).find(req => req.status === 'OPEN' || req.status === 'ASSIGNED');
+              if (latestActiveRequest) setActiveRequest(latestActiveRequest);
+            });
         } else if (currentUser.roles.includes('VENDOR')) {
           // Vendor needs service requests
           fetchServiceRequests(authHeaders);

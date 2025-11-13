@@ -35,6 +35,14 @@ public class ServiceRequestService {
         return requestRepository.findByStatus(RequestStatus.OPEN);
     }
 
+    public List<ServiceRequest> getMyRequests() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return requestRepository.findByRequestingUser(user);
+    }
+
     public Optional<ServiceRequest> getRequestById(Long id) {
         return requestRepository.findById(id);
     }

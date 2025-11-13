@@ -13,13 +13,13 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
   // Custom Google Maps Icons
   const userIcon = {
-    url: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', // Human icon
+    url: 'https://maps.google.com/mapfiles/kml/shapes/man.png', // Human icon for the user
     scaledSize: new window.google.maps.Size(40, 40),
     anchor: new window.google.maps.Point(20, 20),
   };
 
   const vendorIcon = {
-    url: 'https://cdn-icons-png.flaticon.com/128/619/619127.png', // Car icon
+    url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png', // Car icon for vendors
     scaledSize: new window.google.maps.Size(40, 40),
     anchor: new window.google.maps.Point(20, 20),
   };

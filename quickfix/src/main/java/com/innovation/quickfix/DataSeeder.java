@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.Collections;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -95,6 +96,30 @@ public class DataSeeder implements CommandLineRunner {
             vendor4.setLongitude(77.5713);
             vendor4.setAddress("Majestic, Bangalore");
             userRepository.save(vendor4);
+        }
+
+        // Seed Deepak in Hyderabad
+        if (userRepository.findByUsername("deepak").isEmpty()) {
+            User deepak = new User();
+            deepak.setUsername("deepak");
+            deepak.setPassword(passwordEncoder.encode("password")); // Password will be encoded by the service
+            deepak.setEmail("deepak@example.com");
+            deepak.setRoles(Collections.singleton("USER"));
+            deepak.setLatitude(17.3850); // Hyderabad latitude
+            deepak.setLongitude(78.4867); // Hyderabad longitude
+            userRepository.save(deepak);
+        }
+
+        // Seed Gayatri in Pune
+        if (userRepository.findByUsername("gayatri").isEmpty()) {
+            User gayatri = new User();
+            gayatri.setUsername("gayatri");
+            gayatri.setPassword(passwordEncoder.encode("password"));
+            gayatri.setEmail("gayatri@example.com");
+            gayatri.setRoles(Collections.singleton("USER"));
+            gayatri.setLatitude(18.5204); // Pune latitude
+            gayatri.setLongitude(73.8567); // Pune longitude
+            userRepository.save(gayatri);
         }
     }
 }

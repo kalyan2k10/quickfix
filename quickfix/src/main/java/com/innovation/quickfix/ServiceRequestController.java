@@ -27,6 +27,11 @@ public class ServiceRequestController {
         return requestService.getOpenRequests();
     }
 
+    @GetMapping("/my-requests")
+    public List<ServiceRequest> getMyRequests() {
+        return requestService.getMyRequests();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ServiceRequest> getRequestById(@PathVariable Long id) {
         return requestService.getRequestById(id)

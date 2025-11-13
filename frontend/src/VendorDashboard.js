@@ -9,13 +9,13 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
 
   // Custom icons
   const userRequestIcon = {
-    url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    url: 'https://maps.google.com/mapfiles/kml/shapes/man.png', // Human icon for user requests
     scaledSize: new window.google.maps.Size(25, 41),
     anchor: new window.google.maps.Point(12, 41),
   };
 
   const vendorIcon = {
-    url: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png', // Car icon for the vendor
     scaledSize: new window.google.maps.Size(25, 41),
     anchor: new window.google.maps.Point(12, 41),
   };
