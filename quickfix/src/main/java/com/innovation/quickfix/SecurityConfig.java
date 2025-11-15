@@ -42,6 +42,8 @@ public class SecurityConfig {
                 http
                                 .csrf(AbstractHttpConfigurer::disable) // Disabling CSRF for stateless API
                                 .authorizeHttpRequests(authz -> authz
+                                                // Allow public access to the registration endpoint
+                                                .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                                                 // Admin-specific routes for user management
                                                 .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN")
@@ -51,8 +53,6 @@ public class SecurityConfig {
                                                 .hasAuthority("VENDOR")
                                                 .requestMatchers(HttpMethod.POST, "/requests/*/deny")
                                                 .hasAuthority("VENDOR")
-                                                .requestMatchers(HttpMethod.PUT, "/users/*/live-location")
-                                                .hasAuthority("VENDOR")
                                                 .requestMatchers(HttpMethod.GET, "/requests").hasAuthority("VENDOR")
                                                 // User-specific routes
                                                 .requestMatchers(HttpMethod.POST, "/requests").hasAuthority("USER") // For
@@ -60,8 +60,8 @@ public class SecurityConfig {
                                                                                                                     // requests
                                                 .requestMatchers(HttpMethod.POST, "/requests/*/complete_by_user")
                                                 .hasAuthority("USER")
-                                                .requestMatchers(HttpMethod.PUT, "/users/*/location")
-                                                .hasAuthority("USER")
+                                                // Location routes
+                                                .requestMatchers("/locations/**").authenticated()
                                                 // Authenticated routes
                                                 .requestMatchers(HttpMethod.GET, "/users/me").authenticated() // Allow
                                                                                                               // user to

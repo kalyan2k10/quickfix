@@ -12,10 +12,13 @@ public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ServiceRequestRepository serviceRequestRepository;
 
-    public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataSeeder(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            ServiceRequestRepository serviceRequestRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.serviceRequestRepository = serviceRequestRepository;
     }
 
     @Override
@@ -99,27 +102,55 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // Seed Deepak in Hyderabad
+        User deepak;
         if (userRepository.findByUsername("deepak").isEmpty()) {
-            User deepak = new User();
-            deepak.setUsername("deepak");
-            deepak.setPassword(passwordEncoder.encode("password")); // Password will be encoded by the service
-            deepak.setEmail("deepak@example.com");
-            deepak.setRoles(Collections.singleton("USER"));
-            deepak.setLatitude(17.3850); // Hyderabad latitude
-            deepak.setLongitude(78.4867); // Hyderabad longitude
-            userRepository.save(deepak);
+            User deepakUser = new User();
+            deepakUser.setUsername("deepak");
+            deepakUser.setPassword(passwordEncoder.encode("password")); // Password will be encoded by the service
+            deepakUser.setEmail("deepak@example.com");
+            deepakUser.setRoles(Collections.singleton("USER"));
+            deepakUser.setLatitude(12.9293); // Jayanagar
+            deepakUser.setLongitude(77.5825);
+            deepakUser.setAddress("Jayanagar, Bangalore");
+            deepak = userRepository.save(deepakUser);
+        } else {
+            deepak = userRepository.findByUsername("deepak").get();
         }
 
-        // Seed Gayatri in Pune
+        // Seed Gayatri in Indiranagar, Bangalore
+        User gayatri;
         if (userRepository.findByUsername("gayatri").isEmpty()) {
-            User gayatri = new User();
-            gayatri.setUsername("gayatri");
-            gayatri.setPassword(passwordEncoder.encode("password"));
-            gayatri.setEmail("gayatri@example.com");
-            gayatri.setRoles(Collections.singleton("USER"));
-            gayatri.setLatitude(18.5204); // Pune latitude
-            gayatri.setLongitude(73.8567); // Pune longitude
-            userRepository.save(gayatri);
+            User gayatriUser = new User();
+            gayatriUser.setUsername("gayatri");
+            gayatriUser.setPassword(passwordEncoder.encode("password"));
+            gayatriUser.setEmail("gayatri@example.com");
+            gayatriUser.setRoles(Collections.singleton("USER"));
+            gayatriUser.setLatitude(12.9719); // Indiranagar latitude
+            gayatriUser.setLongitude(77.6412); // Indiranagar longitude
+            gayatriUser.setAddress("Indiranagar, Bangalore");
+            gayatri = userRepository.save(gayatriUser);
+        } else {
+            gayatri = userRepository.findByUsername("gayatri").get();
+        }
+
+        // Create a service request from Deepak if he doesn't have one open
+        if (serviceRequestRepository.findByRequestingUser(deepak).stream()
+                .noneMatch(req -> req.getStatus() == RequestStatus.OPEN)) {
+            ServiceRequest deepakRequest = new ServiceRequest();
+            deepakRequest.setProblemDescription("Engine overheating");
+            deepakRequest.setRequestingUser(deepak);
+            deepakRequest.setStatus(RequestStatus.OPEN);
+            serviceRequestRepository.save(deepakRequest);
+        }
+
+        // Create a service request from Gayatri if she doesn't have one open
+        if (serviceRequestRepository.findByRequestingUser(gayatri).stream()
+                .noneMatch(req -> req.getStatus() == RequestStatus.OPEN)) {
+            ServiceRequest gayatriRequest = new ServiceRequest();
+            gayatriRequest.setProblemDescription("Car won't start");
+            gayatriRequest.setRequestingUser(gayatri);
+            gayatriRequest.setStatus(RequestStatus.OPEN);
+            serviceRequestRepository.save(gayatriRequest);
         }
     }
 }

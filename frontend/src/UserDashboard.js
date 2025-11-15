@@ -19,7 +19,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   };
 
   const vendorIcon = {
-    url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png', // Car icon for vendors
+    url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png', // Car icon for the vendor
     scaledSize: new window.google.maps.Size(40, 40),
     anchor: new window.google.maps.Point(20, 20),
   };
@@ -230,20 +230,47 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   return (
     <>
       <div className="form-card">
-        <h2>Book a Service</h2>
-        <form onSubmit={(e) => e.preventDefault()}>
-          <input
-            className="form-input"
-            type="text"
-            name="problemDescription"
-            placeholder="What's the issue? (e.g., Flat tire)"
-            value={newRequest.problemDescription}
-            onChange={onInputChange}
-            required
-          />
-          <button onClick={() => onRequestSubmit()} disabled={!newRequest.problemDescription} className="broadcast-button">
-            Broadcast Request to All Vendors
-          </button>
+        <h2>Request Assistance</h2>
+        <p>Let's get you back on the road. Please provide a few details.</p>
+        <form onSubmit={(e) => { e.preventDefault(); onRequestSubmit(); }}>
+            <select name="problemDescription" value={newRequest.problemDescription} onChange={onInputChange} className="form-input" required>
+                <option value="" disabled>Select service type...</option>
+                <option value="Flat Tyre">Flat Tyre</option>
+                <option value="Battery Jumpstart">Battery Jumpstart</option>
+                <option value="Towing Service">Towing Service</option>
+                <option value="Out of Fuel">Out of Fuel</option>
+                <option value="Key Lockout">Key Lockout</option>
+                <option value="Minor Repairs">Minor Repairs</option>
+                <option value="Other">Other Issue</option>
+            </select>
+            <input
+                className="form-input"
+                type="text" name="vehicleNumber"
+                placeholder="Vehicle Number (e.g., KA-01-AB-1234)"
+                value={newRequest.vehicleNumber} onChange={onInputChange} required />
+            <input
+                className="form-input"
+                type="text" name="name"
+                placeholder="Your Name"
+                value={newRequest.name} onChange={onInputChange} required />
+            <input
+                className="form-input"
+                type="email" name="email"
+                placeholder="Your Email"
+                value={newRequest.email} onChange={onInputChange} required />
+            <input
+                className="form-input"
+                type="tel" name="phoneNumber"
+                placeholder="Your Phone Number"
+                value={newRequest.phoneNumber} onChange={onInputChange} required />
+            
+            {newRequest.problemDescription === 'Other' && (
+              <input className="form-input" type="text" name="otherProblem" placeholder="Please describe the issue" value={newRequest.otherProblem} onChange={onInputChange} required />
+            )}
+
+            <button type="submit" disabled={!newRequest.problemDescription} className="broadcast-button">
+                Find Help Now
+            </button>
         </form>
       </div>
 

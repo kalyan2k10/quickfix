@@ -10,14 +10,14 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
   // Custom icons
   const userRequestIcon = {
     url: 'https://maps.google.com/mapfiles/kml/shapes/man.png', // Human icon for user requests
-    scaledSize: new window.google.maps.Size(25, 41),
-    anchor: new window.google.maps.Point(12, 41),
+    scaledSize: new window.google.maps.Size(40, 40),
+    anchor: new window.google.maps.Point(20, 20),
   };
 
   const vendorIcon = {
     url: 'https://maps.google.com/mapfiles/kml/shapes/cabs.png', // Car icon for the vendor
-    scaledSize: new window.google.maps.Size(25, 41),
-    anchor: new window.google.maps.Point(12, 41),
+    scaledSize: new window.google.maps.Size(40, 40),
+    anchor: new window.google.maps.Point(20, 20),
   };
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
           setVendorLocation(newLocation);
 
           // Send the new location to the backend
-          fetch(`/users/${loggedInUser.id}/live-location`, {
+          fetch(`/locations/users/${loggedInUser.id}`, {
             method: 'PUT',
             headers: authHeaders,
             body: JSON.stringify({ latitude, longitude }),
@@ -126,7 +126,14 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
           {isLoaded && (
             <div className="map-view">
               <GoogleMap mapContainerClassName="map-view-container" center={{ lat: userPosition[0], lng: userPosition[1] }} zoom={13}>
-                {directions && <DirectionsRenderer directions={directions} />}
+                {directions && <DirectionsRenderer 
+                                  directions={directions} 
+                                  options={{ 
+                                    suppressMarkers: true // We'll render our own markers
+                                  }} 
+                                />}
+                <Marker position={{ lat: vendorLocation[0], lng: vendorLocation[1] }} icon={vendorIcon} title="This is you!" />
+                <Marker position={{ lat: userPosition[0], lng: userPosition[1] }} icon={userRequestIcon} title={`User: @${assignedRequest.requestingUser.username}`} />
               </GoogleMap>
             </div>
           )}
@@ -140,7 +147,7 @@ const VendorDashboard = ({ requests, onUpdateRequest, loggedInUser, authHeaders,
   return (
     <>
       <div className="user-list-section">
-        <h2>Incoming Service Requests</h2>
+        <h2>Nearby Users & Service Requests</h2>
         {isLoaded && (
           <div className="map-view">
             <GoogleMap mapContainerClassName="map-view-container" center={{ lat: vendorLocation[0], lng: vendorLocation[1] }} zoom={12}>

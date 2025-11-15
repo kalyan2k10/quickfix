@@ -48,6 +48,12 @@ public class UserController {
         return userService.addUser(user);
     }
 
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public User registerUser(@RequestBody User user) {
+        return userService.addUser(user);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(id, user)
@@ -62,20 +68,5 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @PutMapping("/{id}/location")
-    public ResponseEntity<User> updateUserLocation(@PathVariable Long id, @RequestBody User locationData) {
-        return userService.updateUserLocation(id, locationData)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/{id}/live-location")
-    public ResponseEntity<User> updateLiveUserLocation(@PathVariable Long id, @RequestBody User locationData) {
-        // This endpoint is specifically for live updates, potentially for vendors
-        return userService.updateUserLocation(id, locationData)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
     }
 }

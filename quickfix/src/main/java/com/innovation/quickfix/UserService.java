@@ -2,10 +2,9 @@ package com.innovation.quickfix;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,8 +22,11 @@ public class UserService {
     }
 
     public List<User> getVendors() {
-        return userRepository.findAll().stream().filter(user -> user.getRoles().contains("VENDOR"))
-                .collect(Collectors.toList());
+        return userRepository.findByRolesContaining("VENDOR");
+    }
+
+    public List<User> getUsersByRole(String role) {
+        return userRepository.findByRolesContaining(role);
     }
 
     public Optional<User> getUserById(Long id) {
@@ -36,17 +38,17 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        // Encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
-    public Optional<User> updateUser(Long id, User updatedUser) {
+    public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
-                .map(existingUser -> {
-                    existingUser.setUsername(updatedUser.getUsername());
-                    existingUser.setEmail(updatedUser.getEmail());
-                    return userRepository.save(existingUser);
+                .map(user -> {
+                    user.setUsername(userDetails.getUsername());
+                    user.setEmail(userDetails.getEmail());
+                    // Password and roles should be updated via specific endpoints if needed
+                    return userRepository.save(user);
                 });
     }
 
@@ -60,10 +62,10 @@ public class UserService {
 
     public Optional<User> updateUserLocation(Long id, User locationData) {
         return userRepository.findById(id)
-                .map(existingUser -> {
-                    existingUser.setLatitude(locationData.getLatitude());
-                    existingUser.setLongitude(locationData.getLongitude());
-                    return userRepository.save(existingUser);
+                .map(user -> {
+                    user.setLatitude(locationData.getLatitude());
+                    user.setLongitude(locationData.getLongitude());
+                    return userRepository.save(user);
                 });
     }
 }

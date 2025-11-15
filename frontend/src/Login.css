@@ -1,11 +1,159 @@
-.login-card {
-  background-color: #fdfdfd;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.login-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #fff;
+}
+
+/* Left side with art/branding */
+.login-art-section {
+  width: 50%;
+  background: linear-gradient(to bottom right, #001f3f, #003366); /* Navy Blue Gradient */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.art-content h1 {
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.art-content p {
+  font-size: 1.3em;
+  max-width: 400px;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.features-preview {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.feature-preview-item {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Right side with the form */
+.login-form-section {
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.tabs {
+  display: flex;
   margin-bottom: 30px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 80px; /* Center login card vertically */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #888;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.tab.active {
+  color: #333;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #FF6600; /* Orange Accent */
+  border-radius: 3px 3px 0 0;
+}
+
+.form-content h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8em;
+  color: #333;
+}
+
+.form-section-title {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #555;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-art-section,
+  .login-form-section {
+    width: 100%;
+  }
+
+  .login-art-section {
+    min-height: 300px;
+    padding: 30px;
+  }
+
+  .login-form-section {
+    padding: 20px;
+  }
+}
+
+/* This is a temporary fix for the body style override */
+body {
+  background-size: cover;
+  background-color: #fff; /* Override any other body background styles */
+}
+
+/* Style buttons inside the login/signup form specifically */
+.form-container button[type="submit"] {
+  background-color: #FF6600; /* Orange for primary actions */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.form-container button[type="submit"]:hover {
+  background-color: #e65c00; /* Darker Orange */
+  transform: translateY(-2px);
 }
