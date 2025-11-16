@@ -308,6 +308,7 @@ function App() {
           onSignupAutocompleteLoad={setSignupAutocomplete}
           onSignUpPlaceChanged={handleSignUpPlaceChanged}
           signUpFormState={signUpFormState}
+          setSignUpFormState={setSignUpFormState}
           error={error}
         />
       </div>
@@ -338,7 +339,18 @@ function App() {
       <main className="main-content">
         {error && <p className="error-message">{error}</p>}
         
-        {loggedInUser.roles.includes('ADMIN') && <AdminDashboard users={users} newUser={newUser} onInputChange={handleInputChange} onUserSubmit={handleUserSubmit} isLoaded={isLoaded} onAdminAutocompleteLoad={setAdminAutocomplete} onAdminPlaceChanged={handleAdminPlaceChanged} />}
+        {loggedInUser.roles.includes('ADMIN') && (
+          <AdminDashboard
+            users={users}
+            newUser={newUser}
+            onInputChange={handleInputChange}
+            onUserSubmit={handleUserSubmit}
+            isLoaded={isLoaded}
+            onAdminAutocompleteLoad={setAdminAutocomplete}
+            onAdminPlaceChanged={handleAdminPlaceChanged}
+            setNewUser={setNewUser}
+          />
+        )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
         {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
       </main>

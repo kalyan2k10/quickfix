@@ -1,61 +1,104 @@
-import React from 'react';
-import { Autocomplete } from '@react-google-maps/api';
+import React, { useRef } from 'react';
+import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
 import './AdminDashboard.css';
 
-const AdminDashboard = ({ users, newUser, onInputChange, onUserSubmit, isLoaded, onAdminAutocompleteLoad, onAdminPlaceChanged }) => (
-  <div className="admin-dashboard">
-    <div className="admin-form-container">
+const AdminDashboard = ({
+  users,
+  newUser,
+  onInputChange,
+  onUserSubmit,
+  isLoaded,
+  onAdminAutocompleteLoad,
+  onAdminPlaceChanged,
+  setNewUser,
+}) => {
+  const mapRef = useRef(null);
+
+  const mapContainerStyle = {
+    height: '400px',
+    width: '100%',
+    marginBottom: '1rem',
+  };
+
+  const center = {
+    lat: newUser.latitude || 12.9716,
+    lng: newUser.longitude || 77.5946,
+  };
+
+  const handleMapClick = (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setNewUser((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+
+    // Geocode the location to get an address
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK') {
+        if (results[0]) {
+          setNewUser((prev) => ({ ...prev, address: results[0].formatted_address }));
+        }
+      }
+    });
+  };
+
+  return (
+    <div className="admin-dashboard">
       <div className="form-card">
-        <h2>Create a New User</h2>
+        <h2>Create New User</h2>
         <form onSubmit={onUserSubmit}>
           <input className="form-input" type="text" name="username" placeholder="Username" value={newUser.username} onChange={onInputChange} required />
           <input className="form-input" type="password" name="password" placeholder="Password" value={newUser.password} onChange={onInputChange} required />
           <input className="form-input" type="email" name="email" placeholder="Email" value={newUser.email} onChange={onInputChange} required />
-          <select name="role" value={newUser.role} onChange={onInputChange} className="form-input">
+          <select className="form-input" name="role" value={newUser.role} onChange={onInputChange}>
             <option value="USER">User</option>
             <option value="VENDOR">Vendor</option>
             <option value="ADMIN">Admin</option>
           </select>
 
-          {['USER', 'VENDOR'].includes(newUser.role) && (
+          {isLoaded && (
             <>
-              {isLoaded && (
-                <Autocomplete
-                  onLoad={onAdminAutocompleteLoad}
-                  onPlaceChanged={onAdminPlaceChanged}
-                >
-                  <input className="form-input" type="text" name="address" placeholder="Start typing user's address..." defaultValue={newUser.address} onChange={onInputChange} />
-                </Autocomplete>
-              )}
-              {/* Hidden inputs to hold the lat/lng values */}
-              <input type="hidden" name="latitude" value={newUser.latitude} />
-              <input type="hidden" name="longitude" value={newUser.longitude} />
+              <Autocomplete onLoad={onAdminAutocompleteLoad} onPlaceChanged={onAdminPlaceChanged}>
+                <input
+                  className="form-input"
+                  type="text"
+                  name="address"
+                  placeholder="Enter a location"
+                  value={newUser.address}
+                  onChange={onInputChange}
+                />
+              </Autocomplete>
+              <GoogleMap
+                ref={mapRef}
+                mapContainerStyle={mapContainerStyle}
+                zoom={12}
+                center={center}
+                onClick={handleMapClick}
+              >
+                {newUser.latitude && newUser.longitude && (
+                  <Marker position={{ lat: newUser.latitude, lng: newUser.longitude }} />
+                )}
+              </GoogleMap>
             </>
           )}
 
-          <button type="submit">Add User</button>
+          <button type="submit" className="submit-button">Create User</button>
         </form>
       </div>
-    </div>
 
-    <div className="admin-list-container">
       <div className="user-list-section">
-        <h2>All Users ({users.length})</h2>
-        <ul className="user-list">
+        <h2>Existing Users ({users.length})</h2>
+        <div className="user-list">
           {users.map(user => (
-            <li key={user.id} className="user-card">
-              <div className="user-card-header">
-                <span className="user-role-badge">{user.roles.join(', ')}</span>
-                <strong>@{user.username}</strong>
-              </div>
+            <div key={user.id} className="user-card">
+              <p><strong>Username:</strong> @{user.username}</p>
               <p><strong>Email:</strong> {user.email}</p>
-              {user.address && <p><strong>Location:</strong> {user.address}</p>}
-            </li>
+              <p><strong>Role:</strong> {user.roles.join(', ')}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default AdminDashboard;
