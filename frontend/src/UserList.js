@@ -2,6 +2,12 @@ import React from 'react';
 import './UserList.css';
 
 const UserList = ({ users, onShowCreateUser }) => {
+  const getRoleIcon = (roles) => {
+    if (roles.includes('ADMIN')) return '🛡️'; // Captain/Admin Shield
+    if (roles.includes('VENDOR')) return '🚗'; // Car for Vendor
+    return '👤'; // Human for User
+  };
+
   return (
     <div className="user-list-container">
       <div className="user-list-header">
@@ -13,9 +19,13 @@ const UserList = ({ users, onShowCreateUser }) => {
       <div className="user-list">
         {users.map(user => (
           <div key={user.id} className="user-card">
-            <p><strong>Username:</strong> @{user.username}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Role:</strong> <span className="user-role-badge">{user.roles.join(', ')}</span></p>
+            <div className="user-card-icon">{getRoleIcon(user.roles)}</div>
+            <div className="user-card-details">
+              <p><strong>Username:</strong> @{user.username}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Role:</strong> <span className="user-role-badge">{user.roles.join(', ')}</span></p>
+              {user.address && <p><strong>Location:</strong> {user.address}</p>}
+            </div>
           </div>
         ))}
       </div>
