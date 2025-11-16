@@ -1,0 +1,30 @@
+.user-list-container {
+    width: 100%;
+}
+
+.user-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.user-list-header h2 {
+    margin: 0;
+}
+
+.action-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: #45a049;
+}

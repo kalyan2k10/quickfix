@@ -3,7 +3,6 @@ import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = ({
-  users,
   newUser,
   onInputChange,
   onUserSubmit,
@@ -11,6 +10,7 @@ const AdminDashboard = ({
   onAdminAutocompleteLoad,
   onAdminPlaceChanged,
   setNewUser,
+  onViewUsersClick,
 }) => {
   const mapRef = useRef(null);
 
@@ -44,8 +44,14 @@ const AdminDashboard = ({
 
   return (
     <div className="admin-dashboard">
-      <div className="form-card">
-        <h2>Create New User</h2>
+      <div className="admin-form-container">
+        <div className="form-header">
+          <h2>Create New User</h2>
+          <button onClick={onViewUsersClick} className="action-button">
+            View All Users
+          </button>
+        </div>
+
         <form onSubmit={onUserSubmit}>
           <input className="form-input" type="text" name="username" placeholder="Username" value={newUser.username} onChange={onInputChange} required />
           <input className="form-input" type="password" name="password" placeholder="Password" value={newUser.password} onChange={onInputChange} required />
@@ -89,19 +95,6 @@ const AdminDashboard = ({
 
           <button type="submit" className="submit-button">Create User</button>
         </form>
-      </div>
-
-      <div className="user-list-section">
-        <h2>Existing Users ({users.length})</h2>
-        <div className="user-list">
-          {users.map(user => (
-            <div key={user.id} className="user-card">
-              <p><strong>Username:</strong> @{user.username}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Role:</strong> {user.roles.join(', ')}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

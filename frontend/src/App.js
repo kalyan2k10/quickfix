@@ -3,6 +3,7 @@ import { useJsApiLoader } from '@react-google-maps/api';
 import './App.css'; 
 import AdminDashboard from './AdminDashboard'; // Assuming you have this component
 import VendorDashboard from './VendorDashboard';
+import UserList from './UserList';
 import UserDashboard from './UserDashboard';
 import Login from './Login';
 
@@ -17,6 +18,7 @@ function App() {
   const [signupAutocomplete, setSignupAutocomplete] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [error, setError] = useState('');
+  const [adminView, setAdminView] = useState('createUser'); // 'createUser' or 'viewUsers'
   const [serviceRequests, setServiceRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' });
   const [userLocation, setUserLocation] = useState(null);
@@ -351,17 +353,23 @@ function App() {
       <main className="main-content">
         {error && <p className="error-message">{error}</p>}
         
-        {loggedInUser.roles.includes('ADMIN') && (
-          <AdminDashboard
-            users={users}
-            newUser={newUser}
-            onInputChange={handleAdminDashboardInputChange}
-            onUserSubmit={handleUserSubmit}
-            isLoaded={isLoaded}
-            onAdminAutocompleteLoad={setAdminAutocomplete}
-            onAdminPlaceChanged={handleAdminPlaceChanged}
-            setNewUser={setNewUser}
-          />
+        {loggedInUser.roles.includes('ADMIN') && adminView === 'createUser' && (
+            <AdminDashboard
+              newUser={newUser}
+              onInputChange={handleAdminDashboardInputChange}
+              onUserSubmit={handleUserSubmit}
+              isLoaded={isLoaded}
+              onAdminAutocompleteLoad={setAdminAutocomplete}
+              onAdminPlaceChanged={handleAdminPlaceChanged}
+              setNewUser={setNewUser}
+              onViewUsersClick={() => setAdminView('viewUsers')}
+            />
+        )}
+        {loggedInUser.roles.includes('ADMIN') && adminView === 'viewUsers' && (
+            <UserList 
+              users={users} 
+              onShowCreateUser={() => setAdminView('createUser')} 
+            />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
         {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
