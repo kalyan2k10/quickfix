@@ -13,6 +13,7 @@ const AdminDashboard = ({
   setNewUser,
 }) => {
   const mapRef = useRef(null);
+  const autocompleteRef = useRef(null);
 
   const mapContainerStyle = {
     height: '400px',
@@ -35,7 +36,11 @@ const AdminDashboard = ({
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
       if (status === 'OK') {
         if (results[0]) {
-          setNewUser((prev) => ({ ...prev, address: results[0].formatted_address }));
+          const formattedAddress = results[0].formatted_address;
+          setNewUser((prev) => ({ ...prev, address: formattedAddress }));
+          if (autocompleteRef.current) {
+            autocompleteRef.current.value = formattedAddress;
+          }
         }
       }
     });
@@ -57,13 +62,17 @@ const AdminDashboard = ({
 
           {isLoaded && (
             <>
-              <Autocomplete onLoad={onAdminAutocompleteLoad} onPlaceChanged={onAdminPlaceChanged}>
+              <Autocomplete
+                onLoad={(autocomplete) => {
+                  onAdminAutocompleteLoad(autocomplete);
+                }}
+                onPlaceChanged={onAdminPlaceChanged}
+              >
                 <input
                   className="form-input"
                   type="text"
                   name="address"
                   placeholder="Enter a location"
-                  value={newUser.address}
                   onChange={onInputChange}
                 />
               </Autocomplete>

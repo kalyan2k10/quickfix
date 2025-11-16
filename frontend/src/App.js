@@ -122,28 +122,33 @@ function App() {
       });
   };
 
-  const handleInputChange = (event) => {
+  const handleUserDashboardInputChange = (event) => {
     const { name, value } = event.target;
-    if (['problemDescription', 'vehicleNumber', 'name', 'email', 'phoneNumber', 'otherProblem'].includes(name)) {
-      setNewRequest({ ...newRequest, [name]: value });
-    } else { // This will handle the AdminDashboard's newUser form
-      setNewUser({ ...newUser, [name]: value });
-    }
+    setNewRequest({ ...newRequest, [name]: value });
+  };
+  const handleAdminDashboardInputChange = (event) => {
+    const { name, value } = event.target;
+    setNewUser({ ...newUser, [name]: value });
   };
 
   const handleUserSubmit = (event) => {
     event.preventDefault();
-    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
-    fetch('/users', {
+    // Use the public registration endpoint, same as the sign-up form
+    fetch('/users/register', {
       method: 'POST',
-      headers: authHeaders,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...newUser, roles: [newUser.role] }),
     })
     .then(response => {
-      if (!response.ok) throw new Error('Failed to create user.');
-      return fetch('/users', { headers: authHeaders });
+      if (!response.ok) throw new Error('Failed to create user. The username or email might already be taken.');
+      alert('User created successfully!');
+      // Reset the form for the next entry
+      setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
+      // Refresh the user list for the admin
+      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      return fetch('/users', { headers: authHeaders }); // Re-fetch users
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(setUsers)
     .catch(handleApiError);
   };
@@ -153,7 +158,11 @@ function App() {
       const place = adminAutocomplete.getPlace();
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      setNewUser(prev => ({ ...prev, address: place.formatted_address, latitude: lat, longitude: lng }));
+      // When a place is selected from Autocomplete, update the state
+      // The input's value is now managed by the Autocomplete component itself,
+      // so we just need to sync our state with it.
+      const address = place.formatted_address || place.name;
+      setNewUser(prev => ({ ...prev, address: address, latitude: lat, longitude: lng }));
     } else {
       console.log('Autocomplete is not loaded yet!');
     }
@@ -343,7 +352,7 @@ function App() {
           <AdminDashboard
             users={users}
             newUser={newUser}
-            onInputChange={handleInputChange}
+            onInputChange={handleAdminDashboardInputChange}
             onUserSubmit={handleUserSubmit}
             isLoaded={isLoaded}
             onAdminAutocompleteLoad={setAdminAutocomplete}
@@ -352,7 +361,7 @@ function App() {
           />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
-        {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
+        {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
       </main>
     </div>
   );
