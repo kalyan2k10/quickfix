@@ -13,7 +13,6 @@ const AdminDashboard = ({
   setNewUser,
 }) => {
   const mapRef = useRef(null);
-  const autocompleteRef = useRef(null);
 
   const mapContainerStyle = {
     height: '400px',
@@ -37,10 +36,7 @@ const AdminDashboard = ({
       if (status === 'OK') {
         if (results[0]) {
           const formattedAddress = results[0].formatted_address;
-          setNewUser((prev) => ({ ...prev, address: formattedAddress }));
-          if (autocompleteRef.current) {
-            autocompleteRef.current.value = formattedAddress;
-          }
+          setNewUser((prev) => ({ ...prev, address: formattedAddress, latitude: lat, longitude: lng }));
         }
       }
     });
@@ -73,6 +69,7 @@ const AdminDashboard = ({
                   type="text"
                   name="address"
                   placeholder="Enter a location"
+                  value={newUser.address || ''}
                   onChange={onInputChange}
                 />
               </Autocomplete>

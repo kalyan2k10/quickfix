@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useJsApiLoader } from '@react-google-maps/api';
 import './App.css'; 
 import AdminDashboard from './AdminDashboard'; // Assuming you have this component
 import VendorDashboard from './VendorDashboard';
@@ -25,8 +26,12 @@ function App() {
   const [fare, setFare] = useState(null);
   const [vendorsWithDistances, setVendorsWithDistances] = useState([]);
 
-  // The Google Maps script is now loaded in index.html, so we can assume it's loaded.
-  const isLoaded = true, loadError = null;
+  // Use the hook to safely load the map. Since the script is in index.html,
+  // we just need to specify the libraries.
+  const { isLoaded, loadError } = useJsApiLoader({
+    libraries: ['places'],
+    preventLoad: true, // Prevent the hook from loading the script again
+  });
 
   // Placed outside the component to ensure it's a stable function reference
   const getDistance = (lat1, lon1, lat2, lon2) => {
@@ -158,10 +163,8 @@ function App() {
       const place = adminAutocomplete.getPlace();
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      // When a place is selected from Autocomplete, update the state
-      // The input's value is now managed by the Autocomplete component itself,
-      // so we just need to sync our state with it.
-      const address = place.formatted_address || place.name;
+      // When a place is selected from Autocomplete, update the state.
+      const address = place.formatted_address || place.name || '';
       setNewUser(prev => ({ ...prev, address: address, latitude: lat, longitude: lng }));
     } else {
       console.log('Autocomplete is not loaded yet!');
