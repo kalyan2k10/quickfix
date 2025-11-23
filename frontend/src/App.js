@@ -31,7 +31,7 @@ function App() {
   // Use the hook to safely load the map. Since the script is in index.html,
   // we just need to specify the libraries.
   const { isLoaded, loadError } = useJsApiLoader({
-    libraries: ['places'],
+    libraries: ['places', 'geometry', 'drawing'],
     preventLoad: true, // Prevent the hook from loading the script again
   });
 
@@ -271,6 +271,10 @@ function App() {
   // Effect to calculate nearest vendor, distance, and fare
   useEffect(() => {
     if (userLocation && vendors.length > 0) {
+      if (!isLoaded) {
+        return;
+      }
+
       let closestVendor = null;
       let minDistance = Infinity;
       const allVendorsWithDist = [];
@@ -297,7 +301,7 @@ function App() {
         setFare(calculatedFare);
       }
     }
-  }, [userLocation, vendors]);
+  }, [userLocation, vendors, isLoaded]);
 
   const handleLogout = () => {
     setLoggedInUser(null);

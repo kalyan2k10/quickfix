@@ -62,6 +62,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               // Calculate bearing for icon rotation
               setLiveVendorLocation(prevLoc => {
                 if (prevLoc) {
+                  if (!isLoaded || !window.google.maps.geometry) {
+                    console.error("Google Maps geometry library not loaded yet.");
+                    return newLoc; // Return new location without calculating bearing
+                  }
                   const bearing = window.google.maps.geometry.spherical.computeHeading(
                     new window.google.maps.LatLng(prevLoc.latitude, prevLoc.longitude),
                     new window.google.maps.LatLng(newLoc.latitude, newLoc.longitude)
