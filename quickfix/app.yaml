@@ -1,0 +1,14 @@
+runtime: java21
+instance_class: F2 # Keep the F2 instance class
+
+# REPLACE manual_scaling with automatic_scaling
+automatic_scaling:
+  min_instances: 0 # Saves money when there is no traffic
+  max_instances: 5 # Set a limit for scaling
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+handlers:
+- url: /.*
+  script: auto
