@@ -1,4 +1,4 @@
-package com.innovation.quickfix;
+package com.innovation.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

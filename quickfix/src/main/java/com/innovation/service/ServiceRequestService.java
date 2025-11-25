@@ -1,5 +1,10 @@
-package com.innovation.quickfix;
+package com.innovation.service;
 
+import com.innovation.model.RequestStatus;
+import com.innovation.model.ServiceRequest;
+import com.innovation.model.User;
+import com.innovation.repository.ServiceRequestRepository;
+import com.innovation.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;

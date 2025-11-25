@@ -1,5 +1,6 @@
-package com.innovation.quickfix;
+package com.innovation.repository;
 
+import com.innovation.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

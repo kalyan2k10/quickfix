@@ -1,5 +1,7 @@
-package com.innovation.quickfix;
+package com.innovation.controller;
 
+import com.innovation.model.User;
+import com.innovation.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

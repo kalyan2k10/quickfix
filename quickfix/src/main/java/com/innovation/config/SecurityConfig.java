@@ -1,5 +1,6 @@
-package com.innovation.quickfix;
+package com.innovation.config;
 
+import com.innovation.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

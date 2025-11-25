@@ -1,5 +1,7 @@
-package com.innovation.quickfix;
+package com.innovation.service;
 
+import com.innovation.model.User;
+import com.innovation.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

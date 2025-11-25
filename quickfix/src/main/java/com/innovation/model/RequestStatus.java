@@ -1,4 +1,4 @@
-package com.innovation.quickfix;
+package com.innovation.model;
 
 public enum RequestStatus {
     OPEN, ASSIGNED, COMPLETED, DENIED

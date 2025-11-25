@@ -1,5 +1,6 @@
-package com.innovation.quickfix;
+package com.innovation.repository;
 
+import com.innovation.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

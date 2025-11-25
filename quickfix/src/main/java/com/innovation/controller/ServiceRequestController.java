@@ -1,5 +1,7 @@
-package com.innovation.quickfix;
+package com.innovation.controller;
 
+import com.innovation.model.ServiceRequest;
+import com.innovation.service.ServiceRequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

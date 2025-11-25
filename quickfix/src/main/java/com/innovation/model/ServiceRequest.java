@@ -1,4 +1,4 @@
-package com.innovation.quickfix;
+package com.innovation.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

@@ -1,5 +1,10 @@
-package com.innovation.quickfix;
+package com.innovation.config;
 
+import com.innovation.model.RequestStatus;
+import com.innovation.model.ServiceRequest;
+import com.innovation.model.User;
+import com.innovation.repository.ServiceRequestRepository;
+import com.innovation.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
