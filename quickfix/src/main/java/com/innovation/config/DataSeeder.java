@@ -137,25 +137,5 @@ public class DataSeeder implements CommandLineRunner {
         } else {
             gayatri = userRepository.findByUsername("gayatri").get();
         }
-
-        // Create a service request from Deepak if he doesn't have one open
-        if (serviceRequestRepository.findByRequestingUser(deepak).stream()
-                .noneMatch(req -> req.getStatus() == RequestStatus.OPEN)) {
-            ServiceRequest deepakRequest = new ServiceRequest();
-            deepakRequest.setProblemDescription("Engine overheating");
-            deepakRequest.setRequestingUser(deepak);
-            deepakRequest.setStatus(RequestStatus.OPEN);
-            serviceRequestRepository.save(deepakRequest);
-        }
-
-        // Create a service request from Gayatri if she doesn't have one open
-        if (serviceRequestRepository.findByRequestingUser(gayatri).stream()
-                .noneMatch(req -> req.getStatus() == RequestStatus.OPEN)) {
-            ServiceRequest gayatriRequest = new ServiceRequest();
-            gayatriRequest.setProblemDescription("Car won't start");
-            gayatriRequest.setRequestingUser(gayatri);
-            gayatriRequest.setStatus(RequestStatus.OPEN);
-            serviceRequestRepository.save(gayatriRequest);
-        }
     }
 }
