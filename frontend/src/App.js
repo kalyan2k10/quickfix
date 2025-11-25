@@ -95,8 +95,6 @@ function App() {
           setUserView('homepage'); // Reset user view
           fetch('/users', { headers: authHeaders }).then(res => res.json()).then(setUsers);
         } else if (currentUser.roles.includes('USER')) {
-          // User needs the list of vendors
-          fetch('/users/vendors', { headers: authHeaders }).then(res => res.json()).then(setVendors);
           // Check for any of the user's requests to restore state
           fetch('/requests/my-requests', { headers: authHeaders })
             .then(res => {
@@ -331,8 +329,32 @@ function App() {
         const calculatedFare = 50 + (minDistance * 15);
         setFare(calculatedFare);
       }
+    } else {
+      // If there are no vendors, clear the distances list
+      setVendorsWithDistances([]);
     }
   }, [userLocation, vendors, isLoaded]);
+
+  // Effect to fetch vendors based on the selected service type
+  useEffect(() => {
+    if (loggedInUser?.roles.includes('USER') && newRequest.problemDescription) {
+      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      // Convert UI-friendly name to backend enum-style name
+      const requestType = newRequest.problemDescription.toUpperCase().replace(/ /g, '_');
+
+      // Fetch vendors who can handle this request type
+      fetch(`/locations/live?role=VENDOR&requestType=${requestType}`, { headers: authHeaders })
+        .then(res => {
+          if (!res.ok) throw new Error('Could not fetch vendors for this service type.');
+          return res.json();
+        })
+        .then(setVendors) // This will trigger the distance calculation effect
+        .catch(handleApiError);
+    } else {
+      // If no service is selected, or if the user is not a 'USER', clear the vendors list.
+      setVendors([]);
+    }
+  }, [newRequest.problemDescription, loggedInUser]); // Re-run when the problem description changes
 
   const handleEditUser = (user) => {
     setEditingUser(user);

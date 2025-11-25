@@ -48,5 +48,31 @@ public class DataSeeder implements CommandLineRunner {
             kalyanUser.setAddress("Indiranagar, Bangalore");
             userRepository.save(kalyanUser);
         }
+
+        if (userRepository.findByUsername("vendor1").isEmpty()) {
+            User vendor1 = new User();
+            vendor1.setUsername("vendor1");
+            vendor1.setPassword(passwordEncoder.encode("password"));
+            vendor1.setEmail("vendor1@example.com");
+            vendor1.setRoles(Set.of("VENDOR"));
+            vendor1.setRequestTypes(Set.of("BATTERY_JUMPSTART", "TOWING"));
+            vendor1.setLatitude(12.9293); // Jayanagar
+            vendor1.setLongitude(77.5825);
+            vendor1.setAddress("Jayanagar, Bangalore");
+            userRepository.save(vendor1);
+        }
+
+        if (userRepository.findByUsername("vendor2").isEmpty()) {
+            User vendor2 = new User();
+            vendor2.setUsername("vendor2");
+            vendor2.setPassword(passwordEncoder.encode("password"));
+            vendor2.setEmail("vendor2@example.com");
+            vendor2.setRoles(Set.of("VENDOR"));
+            vendor2.setRequestTypes(Set.of("BATTERY_JUMPSTART", "TOWING"));
+            vendor2.setLatitude(12.9345); // Koramangala
+            vendor2.setLongitude(77.6260);
+            vendor2.setAddress("Koramangala, Bangalore");
+            userRepository.save(vendor2);
+        }
     }
 }

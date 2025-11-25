@@ -283,28 +283,33 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         {loadError && <div>Error loading maps</div>}
         {!isLoaded && <div>Loading Map...</div>}
         {isLoaded && (
-          <div className="map-view">
-              <GoogleMap
-                mapContainerClassName="map-view-container"
-                center={mapCenter}
-                zoom={12}
-              >
-                {/* User's Location */}
-                <Marker position={mapCenter} icon={userIcon} title="You are here" />
+          <>
+            {!newRequest.problemDescription && (
+              <div className="map-overlay-message">Please select a service to see nearby vendors.</div>
+            )}
+            <div className="map-view">
+                <GoogleMap
+                  mapContainerClassName="map-view-container"
+                  center={mapCenter}
+                  zoom={12}
+                >
+                  {/* User's Location */}
+                  <Marker position={mapCenter} icon={userIcon} title="You are here" />
 
-                {/* Nearby Vendor Locations */}
-                {vendorsWithDistances.map(vendor => (
-                  vendor.latitude && vendor.longitude && (
-                    <Marker 
-                      key={vendor.id} 
-                      position={{ lat: vendor.latitude, lng: vendor.longitude }} 
-                      icon={vendorIcon}
-                      title={vendor.username}
-                    />
-                  )
-                ))}
-              </GoogleMap>
-          </div>
+                  {/* Nearby Vendor Locations */}
+                  {vendorsWithDistances.map(vendor => (
+                    vendor.latitude && vendor.longitude && (
+                      <Marker 
+                        key={vendor.id} 
+                        position={{ lat: vendor.latitude, lng: vendor.longitude }} 
+                        icon={vendorIcon}
+                        title={`${vendor.username} (${vendor.distance.toFixed(2)} km away)`}
+                      />
+                    )
+                  ))}
+                </GoogleMap>
+            </div>
+          </>
         )}
       </div>
     </>
