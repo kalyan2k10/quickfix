@@ -42,3 +42,19 @@
     background-color: #6c757d;
     color: white;
 }
+
+.form-section-header {
+    font-size: 1.2em;
+    color: var(--primary-color);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+form label {
+    margin-top: 10px;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #555;
+}

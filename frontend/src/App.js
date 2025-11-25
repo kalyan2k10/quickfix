@@ -12,7 +12,7 @@ import Login from './Login';
 function App() {
   const [users, setUsers] = useState([]);
   const [vendors, setVendors] = useState([]);
-  const [newUser, setNewUser] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
+  const [newUser, setNewUser] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' });
   const [signUpFormState, setSignUpFormState] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [adminAutocomplete, setAdminAutocomplete] = useState(null);
@@ -178,7 +178,7 @@ function App() {
 
     fetchPromise.then(() => {
       // Reset form fields and state
-      setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
+      setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' });
       setNewUserRequestTypes([]);
       setAdminView('viewUsers');
       // Re-fetch users to update the list
@@ -366,6 +366,12 @@ function App() {
       latitude: user.latitude || '',
       longitude: user.longitude || '',
       address: user.address || '',
+      name: user.name || '',
+      digitalSignaturePath: user.digitalSignaturePath || '',
+      adhaarCardPath: user.adhaarCardPath || '',
+      voterIdPath: user.voterIdPath || '',
+      panCardPath: user.panCardPath || '',
+      shopRegistrationPath: user.shopRegistrationPath || '',
     });
     setNewUserRequestTypes(user.requestTypes ? Array.from(user.requestTypes) : []);
     setAdminView('createUser'); // Reuse the create user form for editing
@@ -456,7 +462,7 @@ function App() {
               setNewUser={setNewUser}
               newUserRequestTypes={newUserRequestTypes}
               setNewUserRequestTypes={setNewUserRequestTypes}
-              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
+              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
             />
         )}

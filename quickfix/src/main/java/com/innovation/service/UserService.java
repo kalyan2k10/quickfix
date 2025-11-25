@@ -72,6 +72,14 @@ public class UserService {
                         user.getRequestTypes().clear();
                     }
 
+                    // Update Vendor KYC details
+                    user.setName(userDetails.getName());
+                    user.setDigitalSignaturePath(userDetails.getDigitalSignaturePath());
+                    user.setAdhaarCardPath(userDetails.getAdhaarCardPath());
+                    user.setVoterIdPath(userDetails.getVoterIdPath());
+                    user.setPanCardPath(userDetails.getPanCardPath());
+                    user.setShopRegistrationPath(userDetails.getShopRegistrationPath());
+
                     // Update location
                     user.setAddress(userDetails.getAddress());
                     user.setLatitude(userDetails.getLatitude());

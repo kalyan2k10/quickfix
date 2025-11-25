@@ -22,6 +22,14 @@ public class User {
     private Double longitude;
     private String address;
 
+    // New fields for Vendor KYC
+    private String name; // Full name of the vendor/shop owner
+    private String digitalSignaturePath;
+    private String adhaarCardPath;
+    private String voterIdPath;
+    private String panCardPath;
+    private String shopRegistrationPath;
+
     public User() {
     }
 
@@ -112,5 +120,53 @@ public class User {
 
     public void setRequestTypes(Set<String> requestTypes) {
         this.requestTypes = requestTypes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDigitalSignaturePath() {
+        return digitalSignaturePath;
+    }
+
+    public void setDigitalSignaturePath(String digitalSignaturePath) {
+        this.digitalSignaturePath = digitalSignaturePath;
+    }
+
+    public String getAdhaarCardPath() {
+        return adhaarCardPath;
+    }
+
+    public void setAdhaarCardPath(String adhaarCardPath) {
+        this.adhaarCardPath = adhaarCardPath;
+    }
+
+    public String getVoterIdPath() {
+        return voterIdPath;
+    }
+
+    public void setVoterIdPath(String voterIdPath) {
+        this.voterIdPath = voterIdPath;
+    }
+
+    public String getPanCardPath() {
+        return panCardPath;
+    }
+
+    public void setPanCardPath(String panCardPath) {
+        this.panCardPath = panCardPath;
+    }
+
+    public String getShopRegistrationPath() {
+        return shopRegistrationPath;
+    }
+
+    public void setShopRegistrationPath(String shopRegistrationPath) {
+        this.shopRegistrationPath = shopRegistrationPath;
     }
 }

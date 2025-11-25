@@ -84,19 +84,40 @@ const AdminDashboard = ({
           </select>
 
           {newUser.role === 'VENDOR' && (
-            <select
-              className="form-input"
-              name="requestTypes"
-              multiple
-              value={newUserRequestTypes}
-              onChange={handleRequestTypeChange}
-              required={newUser.role === 'VENDOR'}
-            >
-              <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
-              {availableRequestTypes.map((type) => (
-                <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
-              ))}
-            </select>
+            <>
+              <h3 className="form-section-header">Vendor Services</h3>
+              <select
+                className="form-input"
+                name="requestTypes"
+                multiple
+                value={newUserRequestTypes}
+                onChange={handleRequestTypeChange}
+                required={newUser.role === 'VENDOR'}
+              >
+                <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
+                {availableRequestTypes.map((type) => (
+                  <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
+                ))}
+              </select>
+
+              <h3 className="form-section-header">Vendor KYC Details</h3>
+              <input className="form-input" type="text" name="name" placeholder="Full Name or Shop Name" value={newUser.name || ''} onChange={onInputChange} required />
+              
+              <label htmlFor="digitalSignature">Digital Signature</label>
+              <input className="form-input" type="file" name="digitalSignaturePath" id="digitalSignature" onChange={onInputChange} />
+              
+              <label htmlFor="adhaarCard">Aadhaar Card</label>
+              <input className="form-input" type="file" name="adhaarCardPath" id="adhaarCard" onChange={onInputChange} />
+              
+              <label htmlFor="voterId">Voter ID</label>
+              <input className="form-input" type="file" name="voterIdPath" id="voterId" onChange={onInputChange} />
+              
+              <label htmlFor="panCard">PAN Card</label>
+              <input className="form-input" type="file" name="panCardPath" id="panCard" onChange={onInputChange} />
+              
+              <label htmlFor="shopRegistration">Shop Registration Details</label>
+              <input className="form-input" type="file" name="shopRegistrationPath" id="shopRegistration" onChange={onInputChange} />
+            </>
           )}
 
           {isLoaded && (
