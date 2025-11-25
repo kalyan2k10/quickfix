@@ -426,6 +426,13 @@ function App() {
     // Switch to the dashboard view
     setUserView('dashboard');
   };
+
+  const handleGoHome = (e) => {
+    e.preventDefault();
+    setNewRequest({ problemDescription: '', vehicleNumber: '', name: loggedInUser.username, email: loggedInUser.email, phoneNumber: '', otherProblem: '' });
+    setUserView('homepage');
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -437,7 +444,9 @@ function App() {
           <h1>ZoomFix</h1>
         </div>
         <nav className="app-nav">
-          <a href="#" onClick={(e) => e.preventDefault()}>Home</a>
+          {loggedInUser?.roles.includes('USER') && userView !== 'homepage' && (
+            <a href="#" onClick={handleGoHome}>Home</a>
+          )}
           <a href="#" onClick={(e) => {e.preventDefault(); alert('Coming Soon!');}}>About</a>
           <a href="#" onClick={(e) => {e.preventDefault(); alert('Coming Soon!');}}>Contact</a>
           <a href="#" onClick={(e) => {e.preventDefault(); alert('Coming Soon!');}}>Help</a>
