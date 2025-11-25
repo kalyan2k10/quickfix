@@ -37,3 +37,8 @@
     font-size: 0.8em;
     font-weight: 600;
 }
+
+.action-button.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}

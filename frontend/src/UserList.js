@@ -1,7 +1,7 @@
 import React from 'react';
 import './UserList.css';
-
-const UserList = ({ users, onShowCreateUser }) => {
+ 
+const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
   const getRoleIcon = (roles) => {
     if (roles.includes('ADMIN')) return '🛡️'; // Captain/Admin Shield
     if (roles.includes('VENDOR')) return '🚗'; // Car for Vendor
@@ -25,6 +25,15 @@ const UserList = ({ users, onShowCreateUser }) => {
               <p><strong>Email:</strong> {user.email}</p>
               <p><strong>Role:</strong> <span className="user-role-badge">{user.roles.join(', ')}</span></p>
               {user.address && <p><strong>Location:</strong> {user.address}</p>}
+              {user.roles.includes('VENDOR') && user.requestTypes && user.requestTypes.length > 0 && (
+                <p>
+                  <strong>Services:</strong> <span className="services-list">{user.requestTypes.join(', ')}</span>
+                </p>
+              )}
+              <div className="user-actions">
+                <button onClick={() => onEditUser(user)} className="action-button edit-button">Edit</button>
+                <button onClick={() => onDeleteUser(user.id)} className="action-button delete-button">Delete</button>
+              </div>
             </div>
           </div>
         ))}

@@ -47,3 +47,25 @@
 .action-button:hover {
     background-color: #45a049;
 }
+.user-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.action-button.edit-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.action-button.edit-button:hover {
+    background-color: #0069d9;
+}
+
+.action-button.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+.action-button.delete-button:hover {
+    background-color: #c82333;
+}

@@ -35,6 +35,11 @@ public class User {
     @Column(name = "roles")
     private Set<String> roles = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_request_types", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "request_type")
+    private Set<String> requestTypes = new HashSet<>();
+
     // Getters and Setters
 
     public long getId() {
@@ -99,5 +104,13 @@ public class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Set<String> getRequestTypes() {
+        return requestTypes;
+    }
+
+    public void setRequestTypes(Set<String> requestTypes) {
+        this.requestTypes = requestTypes;
     }
 }

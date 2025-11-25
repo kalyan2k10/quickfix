@@ -23,7 +23,11 @@ public class LocationController {
     }
 
     @GetMapping("/live")
-    public List<User> getLiveLocationsByRole(@RequestParam("role") String role) {
+    public List<User> getLiveLocationsByRole(@RequestParam("role") String role,
+            @RequestParam(name = "requestType", required = false) String requestType) {
+        if ("VENDOR".equalsIgnoreCase(role) && requestType != null && !requestType.isEmpty()) {
+            return userService.getVendorsByRequestType(requestType.toUpperCase());
+        }
         return userService.getUsersByRole(role.toUpperCase());
     }
 

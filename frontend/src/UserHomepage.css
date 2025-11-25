@@ -1,0 +1,219 @@
+/* --- General Styling & Color Palette --- */
+:root {
+    --primary-color: #007bff; /* Trustworthy Blue */
+    --accent-color: #ff7e00; /* Action Orange (Rescue/Urgency) */
+    --dark-text: #333;
+    --light-bg: #f8f9fa;
+    --white: #fff;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+.user-homepage {
+    font-family: Arial, sans-serif;
+    color: var(--dark-text);
+    background-color: var(--white);
+}
+
+.user-homepage .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* --- Buttons & CTAs --- */
+.user-homepage .cta-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: var(--accent-color);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: background-color 0.3s;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+}
+
+.user-homepage .cta-button:hover {
+    background-color: #e66e00; /* Darker orange on hover */
+}
+
+.user-homepage .section-title {
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 40px;
+    color: var(--primary-color);
+}
+
+/* --- Header/Navigation --- */
+.user-homepage header {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 10px 0;
+    border-bottom: 4px solid var(--accent-color);
+}
+
+.user-homepage header .nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-homepage header .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.user-homepage header nav a {
+    color: var(--white);
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 600;
+}
+
+/* --- Hero Section --- */
+.user-homepage #hero {
+    /* background: url('placeholder-vehicle-bg.jpg') no-repeat center center/cover; */
+    background-color: #343a40; /* Dark overlay */
+    color: var(--white);
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.user-homepage #hero h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.user-homepage #hero p {
+    font-size: 1.4em;
+    margin-bottom: 30px;
+}
+
+/* --- Process Section (3 Steps) --- */
+.user-homepage #process {
+    background-color: var(--light-bg);
+    padding: 60px 0;
+}
+
+.user-homepage .process-flow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.user-homepage .flow-step {
+    background-color: var(--white);
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.3s;
+}
+
+.user-homepage .flow-step:hover {
+    transform: scale(1.05);
+}
+
+.user-homepage .flow-step h3 {
+    color: var(--accent-color);
+    margin-bottom: 10px;
+}
+
+.user-homepage .flow-arrow {
+    width: 50px;
+    height: 20px;
+    background-color: var(--accent-color);
+    position: relative;
+    clip-path: polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%);
+}
+
+/* --- Services Section --- */
+.user-homepage #services {
+    padding: 60px 0;
+}
+
+.user-homepage .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.user-homepage .service-card {
+    background-color: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 2px 5px var(--shadow);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.user-homepage .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px var(--shadow);
+}
+
+.user-homepage .service-card h4 {
+    color: var(--primary-color);
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.user-homepage .service-card .price {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* --- Footer --- */
+.user-homepage footer {
+    background-color: #343a40;
+    color: #ddd;
+    padding: 40px 0;
+    font-size: 0.9em;
+}
+
+.user-homepage footer .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.user-homepage footer h5 {
+    color: var(--white);
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.user-homepage footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+.user-homepage footer ul li a {
+    color: #ccc;
+    text-decoration: none;
+    line-height: 2;
+}
+
+.user-homepage footer .copyright {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 30px;
+    border-top: 1px solid #555;
+    grid-column: 1 / -1;
+}

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -40,6 +41,10 @@ public class UserService {
     }
 
     public User addUser(User user) {
+        if (user.getRoles().contains("VENDOR")
+                && (user.getRequestTypes() == null || user.getRequestTypes().isEmpty())) {
+            throw new IllegalArgumentException("A vendor must have at least one request type.");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -49,7 +54,34 @@ public class UserService {
                 .map(user -> {
                     user.setUsername(userDetails.getUsername());
                     user.setEmail(userDetails.getEmail());
-                    // Password and roles should be updated via specific endpoints if needed
+
+                    // Update roles
+                    if (userDetails.getRoles() != null && !userDetails.getRoles().isEmpty()) {
+                        user.setRoles(userDetails.getRoles());
+                    }
+
+                    // If the user is a vendor, handle request types
+                    if (user.getRoles().contains("VENDOR")) {
+                        // It's mandatory for a vendor to have at least one service type
+                        if (userDetails.getRequestTypes() == null || userDetails.getRequestTypes().isEmpty()) {
+                            throw new IllegalArgumentException("A vendor must have at least one request type.");
+                        }
+                        user.setRequestTypes(userDetails.getRequestTypes());
+                    } else {
+                        // If user is not a vendor, clear any existing request types
+                        user.getRequestTypes().clear();
+                    }
+
+                    // Update location
+                    user.setAddress(userDetails.getAddress());
+                    user.setLatitude(userDetails.getLatitude());
+                    user.setLongitude(userDetails.getLongitude());
+
+                    // Update password only if a new one is provided
+                    if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                        user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+                    }
+
                     return userRepository.save(user);
                 });
     }
@@ -69,5 +101,10 @@ public class UserService {
                     user.setLongitude(locationData.getLongitude());
                     return userRepository.save(user);
                 });
+    }
+
+    public List<User> getVendorsByRequestType(String requestType) {
+        Objects.requireNonNull(requestType, "Request type cannot be null");
+        return userRepository.findByRolesContainingAndRequestTypesContaining("VENDOR", requestType);
     }
 }

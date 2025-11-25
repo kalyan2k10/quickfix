@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import './App.css'; 
+import UserHomepage from './UserHomepage';
 import AdminDashboard from './AdminDashboard'; // Assuming you have this component
 import VendorDashboard from './VendorDashboard';
 import UserList from './UserList';
@@ -19,6 +20,9 @@ function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [error, setError] = useState('');
   const [adminView, setAdminView] = useState('createUser'); // 'createUser' or 'viewUsers'
+  const [userView, setUserView] = useState('homepage'); // 'homepage' or 'dashboard'
+  const [newUserRequestTypes, setNewUserRequestTypes] = useState([]); // New state for admin creating user
+  const [editingUser, setEditingUser] = useState(null); // State to hold user being edited
   const [serviceRequests, setServiceRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' });
   const [userLocation, setUserLocation] = useState(null);
@@ -88,6 +92,7 @@ function App() {
         // Step 2: Based on role, fetch necessary additional data
         if (currentUser.roles.includes('ADMIN')) {
           // Admin needs the full user list
+          setUserView('homepage'); // Reset user view
           fetch('/users', { headers: authHeaders }).then(res => res.json()).then(setUsers);
         } else if (currentUser.roles.includes('USER')) {
           // User needs the list of vendors
@@ -138,21 +143,47 @@ function App() {
     setNewUser({ ...newUser, [name]: value });
   };
 
-  const handleUserSubmit = (event) => {
+  const handleUserFormSubmit = (event) => {
     event.preventDefault();
-    // Use the public registration endpoint, same as the sign-up form
-    fetch('/users/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newUser, roles: [newUser.role] }),
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to create user. The username or email might already be taken.');
-      alert('User created successfully!');
-      // Reset the form for the next entry
+    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+    const userPayload = {
+      ...newUser,
+      roles: [newUser.role],
+      requestTypes: newUser.role === 'VENDOR' ? newUserRequestTypes : [],
+    };
+
+    let fetchPromise;
+    if (editingUser) {
+      // Update existing user
+      fetchPromise = fetch(`/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: authHeaders,
+        body: JSON.stringify(userPayload),
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to update user.');
+        alert('User updated successfully!');
+        setEditingUser(null); // Clear editing state
+      });
+    } else {
+      // Create new user
+      fetchPromise = fetch('/users/register', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(userPayload),
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to create user. The username or email might already be taken.');
+        alert('User created successfully!');
+      });
+    }
+
+    fetchPromise.then(() => {
+      // Reset form fields and state
       setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
-      // Refresh the user list for the admin
-      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      setNewUserRequestTypes([]);
+      setAdminView('viewUsers');
+      // Re-fetch users to update the list
       return fetch('/users', { headers: authHeaders }); // Re-fetch users
     })
     .then(res => res.json())
@@ -303,6 +334,33 @@ function App() {
     }
   }, [userLocation, vendors, isLoaded]);
 
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setNewUser({
+      username: user.username,
+      password: '', // Password should not be pre-filled for security
+      email: user.email,
+      role: user.roles.includes('ADMIN') ? 'ADMIN' : (user.roles.includes('VENDOR') ? 'VENDOR' : 'USER'),
+      latitude: user.latitude || '',
+      longitude: user.longitude || '',
+      address: user.address || '',
+    });
+    setNewUserRequestTypes(user.requestTypes ? Array.from(user.requestTypes) : []);
+    setAdminView('createUser'); // Reuse the create user form for editing
+  };
+
+  const handleDeleteUser = (userId) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      fetch(`/users/${userId}`, { method: 'DELETE', headers: authHeaders })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to delete user.');
+          alert('User deleted successfully.');
+          return fetch('/users', { headers: authHeaders }); // Refresh user list
+        }).then(res => res.json()).then(setUsers).catch(handleApiError);
+    }
+  };
+
   const handleLogout = () => {
     setLoggedInUser(null);
     setCredentials({ username: '', password: '' });
@@ -311,6 +369,7 @@ function App() {
     setError('');
     setUserLocation(null);
     setActiveRequest(null);
+    setUserView('homepage');
   };
 
   if (!loggedInUser) {
@@ -333,6 +392,12 @@ function App() {
     );
   }
 
+  const handleSelectService = (service) => {
+    // Set the problem description in the state for the UserDashboard
+    setNewRequest(prev => ({ ...prev, problemDescription: service }));
+    // Switch to the dashboard view
+    setUserView('dashboard');
+  };
   return (
     <div className="app-container">
       <header className="app-header">
@@ -360,23 +425,34 @@ function App() {
         {loggedInUser.roles.includes('ADMIN') && adminView === 'createUser' && (
             <AdminDashboard
               newUser={newUser}
+              editingUser={editingUser}
               onInputChange={handleAdminDashboardInputChange}
-              onUserSubmit={handleUserSubmit}
+              onUserSubmit={handleUserFormSubmit}
               isLoaded={isLoaded}
               onAdminAutocompleteLoad={setAdminAutocomplete}
               onAdminPlaceChanged={handleAdminPlaceChanged}
               setNewUser={setNewUser}
+              newUserRequestTypes={newUserRequestTypes}
+              setNewUserRequestTypes={setNewUserRequestTypes}
+              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
             />
         )}
         {loggedInUser.roles.includes('ADMIN') && adminView === 'viewUsers' && (
             <UserList 
               users={users} 
-              onShowCreateUser={() => setAdminView('createUser')} 
+              onShowCreateUser={() => { setEditingUser(null); setAdminView('createUser'); }} 
+              onEditUser={handleEditUser}
+              onDeleteUser={handleDeleteUser}
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
-        {loggedInUser.roles.includes('USER') && <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} />}
+        {loggedInUser.roles.includes('USER') && userView === 'homepage' && (
+          <UserHomepage onGetRescued={() => setUserView('dashboard')} onSelectService={handleSelectService} />
+        )}
+        {loggedInUser.roles.includes('USER') && userView === 'dashboard' && (
+          <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} onBackToHome={() => setUserView('homepage')} />
+        )}
       </main>
     </div>
   );

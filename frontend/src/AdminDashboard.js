@@ -1,15 +1,20 @@
 import React, { useRef } from 'react';
 import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
+import { availableRequestTypes } from './constants';
 import './AdminDashboard.css';
 
 const AdminDashboard = ({
   newUser,
+  editingUser,
   onInputChange,
   onUserSubmit,
   isLoaded,
   onAdminAutocompleteLoad,
   onAdminPlaceChanged,
   setNewUser,
+  newUserRequestTypes,
+  setNewUserRequestTypes,
+  onCancelEdit,
   onViewUsersClick,
 }) => {
   const mapRef = useRef(null);
@@ -42,11 +47,27 @@ const AdminDashboard = ({
     });
   };
 
+  const handleRequestTypeChange = (event) => {
+    const { options } = event.target;
+    const selectedValues = [];
+    for (let i = 0, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        selectedValues.push(options[i].value);
+      }
+    }
+    setNewUserRequestTypes(selectedValues);
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="admin-form-container">
         <div className="form-header">
-          <h2>Create New User</h2>
+          <h2>{editingUser ? 'Edit User' : 'Create New User'}</h2>
+          {editingUser && (
+            <button onClick={onCancelEdit} className="action-button cancel-button">
+              Cancel Edit
+            </button>
+          )}
           <button onClick={onViewUsersClick} className="action-button">
             View All Users
           </button>
@@ -54,13 +75,29 @@ const AdminDashboard = ({
 
         <form onSubmit={onUserSubmit}>
           <input className="form-input" type="text" name="username" placeholder="Username" value={newUser.username} onChange={onInputChange} required />
-          <input className="form-input" type="password" name="password" placeholder="Password" value={newUser.password} onChange={onInputChange} required />
+          <input className="form-input" type="password" name="password" placeholder={editingUser ? "New Password (optional)" : "Password"} value={newUser.password} onChange={onInputChange} required={!editingUser} />
           <input className="form-input" type="email" name="email" placeholder="Email" value={newUser.email} onChange={onInputChange} required />
           <select className="form-input" name="role" value={newUser.role} onChange={onInputChange}>
             <option value="USER">User</option>
             <option value="VENDOR">Vendor</option>
             <option value="ADMIN">Admin</option>
           </select>
+
+          {newUser.role === 'VENDOR' && (
+            <select
+              className="form-input"
+              name="requestTypes"
+              multiple
+              value={newUserRequestTypes}
+              onChange={handleRequestTypeChange}
+              required={newUser.role === 'VENDOR'}
+            >
+              <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
+              {availableRequestTypes.map((type) => (
+                <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
+              ))}
+            </select>
+          )}
 
           {isLoaded && (
             <>
@@ -93,7 +130,7 @@ const AdminDashboard = ({
             </>
           )}
 
-          <button type="submit" className="submit-button">Create User</button>
+          <button type="submit" className="submit-button">{editingUser ? 'Update User' : 'Create User'}</button>
         </form>
       </div>
     </div>
