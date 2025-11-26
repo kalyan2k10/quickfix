@@ -9,6 +9,7 @@ const AdminDashboard = ({
   onInputChange,
   onUserSubmit,
   isLoaded,
+  onFileChange, // New prop for handling file inputs
   onAdminAutocompleteLoad,
   onAdminPlaceChanged,
   setNewUser,
@@ -104,19 +105,19 @@ const AdminDashboard = ({
               <input className="form-input" type="text" name="name" placeholder="Full Name or Shop Name" value={newUser.name || ''} onChange={onInputChange} required />
               
               <label htmlFor="digitalSignature">Digital Signature</label>
-              <input className="form-input" type="file" name="digitalSignaturePath" id="digitalSignature" onChange={onInputChange} />
+              <input className="form-input" type="file" name="digitalSignature" id="digitalSignature" onChange={onFileChange} />
               
               <label htmlFor="adhaarCard">Aadhaar Card</label>
-              <input className="form-input" type="file" name="adhaarCardPath" id="adhaarCard" onChange={onInputChange} />
+              <input className="form-input" type="file" name="adhaarCard" id="adhaarCard" onChange={onFileChange} />
               
               <label htmlFor="voterId">Voter ID</label>
-              <input className="form-input" type="file" name="voterIdPath" id="voterId" onChange={onInputChange} />
+              <input className="form-input" type="file" name="voterId" id="voterId" onChange={onFileChange} />
               
               <label htmlFor="panCard">PAN Card</label>
-              <input className="form-input" type="file" name="panCardPath" id="panCard" onChange={onInputChange} />
+              <input className="form-input" type="file" name="panCard" id="panCard" onChange={onFileChange} />
               
               <label htmlFor="shopRegistration">Shop Registration Details</label>
-              <input className="form-input" type="file" name="shopRegistrationPath" id="shopRegistration" onChange={onInputChange} />
+              <input className="form-input" type="file" name="shopRegistration" id="shopRegistration" onChange={onFileChange} />
             </>
           )}
 

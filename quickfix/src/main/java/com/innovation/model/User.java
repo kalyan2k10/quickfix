@@ -1,6 +1,7 @@
 package com.innovation.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -24,11 +25,22 @@ public class User {
 
     // New fields for Vendor KYC
     private String name; // Full name of the vendor/shop owner
-    private String digitalSignaturePath;
-    private String adhaarCardPath;
-    private String voterIdPath;
-    private String panCardPath;
-    private String shopRegistrationPath;
+
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] digitalSignature;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] adhaarCard;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] voterId;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] panCard;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] shopRegistration;
 
     public User() {
     }
@@ -130,43 +142,82 @@ public class User {
         this.name = name;
     }
 
-    public String getDigitalSignaturePath() {
-        return digitalSignaturePath;
+    public byte[] getDigitalSignature() {
+        return digitalSignature;
     }
 
-    public void setDigitalSignaturePath(String digitalSignaturePath) {
-        this.digitalSignaturePath = digitalSignaturePath;
+    public void setDigitalSignature(byte[] digitalSignature) {
+        this.digitalSignature = digitalSignature;
     }
 
-    public String getAdhaarCardPath() {
-        return adhaarCardPath;
+    public byte[] getAdhaarCard() {
+        return adhaarCard;
     }
 
-    public void setAdhaarCardPath(String adhaarCardPath) {
-        this.adhaarCardPath = adhaarCardPath;
+    public void setAdhaarCard(byte[] adhaarCard) {
+        this.adhaarCard = adhaarCard;
     }
 
-    public String getVoterIdPath() {
-        return voterIdPath;
+    public byte[] getVoterId() {
+        return voterId;
     }
 
-    public void setVoterIdPath(String voterIdPath) {
-        this.voterIdPath = voterIdPath;
+    public void setVoterId(byte[] voterId) {
+        this.voterId = voterId;
     }
 
-    public String getPanCardPath() {
-        return panCardPath;
+    public byte[] getPanCard() {
+        return panCard;
     }
 
-    public void setPanCardPath(String panCardPath) {
-        this.panCardPath = panCardPath;
+    public void setPanCard(byte[] panCard) {
+        this.panCard = panCard;
     }
 
-    public String getShopRegistrationPath() {
-        return shopRegistrationPath;
+    public byte[] getShopRegistration() {
+        return shopRegistration;
     }
 
-    public void setShopRegistrationPath(String shopRegistrationPath) {
-        this.shopRegistrationPath = shopRegistrationPath;
+    public void setShopRegistration(byte[] shopRegistration) {
+        this.shopRegistration = shopRegistration;
     }
+
+    // --- Transient properties for JSON serialization ---
+    // These methods are not stored in the DB but are included in JSON responses.
+
+    @JsonProperty("panCard")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasPanCard() {
+        return this.panCard != null && this.panCard.length > 0;
+    }
+
+    @JsonProperty("adhaarCard")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasAdhaarCard() {
+        return this.adhaarCard != null && this.adhaarCard.length > 0;
+    }
+
+    @JsonProperty("digitalSignature")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasDigitalSignature() {
+        return this.digitalSignature != null && this.digitalSignature.length > 0;
+    }
+
+    @JsonProperty("voterId")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasVoterId() {
+        return this.voterId != null && this.voterId.length > 0;
+    }
+
+    @JsonProperty("shopRegistration")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasShopRegistration() {
+        return this.shopRegistration != null && this.shopRegistration.length > 0;
+    }
+
+    @JsonProperty("hasDocuments")
+    public boolean hasAnyDocument() {
+        return hasPanCard() || hasAdhaarCard() || hasDigitalSignature() || hasVoterId() || hasShopRegistration();
+    }
+
 }

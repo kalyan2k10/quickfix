@@ -12,7 +12,7 @@ import Login from './Login';
 function App() {
   const [users, setUsers] = useState([]);
   const [vendors, setVendors] = useState([]);
-  const [newUser, setNewUser] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' });
+  const [newUser, setNewUser] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' });
   const [signUpFormState, setSignUpFormState] = useState({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '' });
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [adminAutocomplete, setAdminAutocomplete] = useState(null);
@@ -23,6 +23,7 @@ function App() {
   const [userView, setUserView] = useState('homepage'); // 'homepage' or 'dashboard'
   const [newUserRequestTypes, setNewUserRequestTypes] = useState([]); // New state for admin creating user
   const [editingUser, setEditingUser] = useState(null); // State to hold user being edited
+  const [newUserFiles, setNewUserFiles] = useState({}); // New state for file uploads
   const [serviceRequests, setServiceRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' });
   const [userLocation, setUserLocation] = useState(null);
@@ -141,14 +142,33 @@ function App() {
     setNewUser({ ...newUser, [name]: value });
   };
 
+  const handleFileChange = (event) => {
+    const { name, files } = event.target;
+    if (files.length > 0) {
+      setNewUserFiles(prev => ({ ...prev, [name]: files[0] }));
+    }
+  };
+
   const handleUserFormSubmit = (event) => {
     event.preventDefault();
-    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
-    const userPayload = {
+    const authHeaders = { 'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`) };
+
+    const formData = new FormData();
+    const userBlob = new Blob([JSON.stringify({
       ...newUser,
       roles: [newUser.role],
       requestTypes: newUser.role === 'VENDOR' ? newUserRequestTypes : [],
-    };
+    })], {
+      type: 'application/json'
+    });
+    formData.append('user', userBlob);
+
+    // Append files
+    Object.keys(newUserFiles).forEach(key => {
+      if (newUserFiles[key]) {
+        formData.append(key, newUserFiles[key]);
+      }
+    });
 
     let fetchPromise;
     if (editingUser) {
@@ -156,7 +176,7 @@ function App() {
       fetchPromise = fetch(`/users/${editingUser.id}`, {
         method: 'PUT',
         headers: authHeaders,
-        body: JSON.stringify(userPayload),
+        body: formData,
       })
       .then(response => {
         if (!response.ok) throw new Error('Failed to update user.');
@@ -164,21 +184,15 @@ function App() {
         setEditingUser(null); // Clear editing state
       });
     } else {
-      // Create new user
-      fetchPromise = fetch('/users/register', {
-        method: 'POST',
-        headers: authHeaders,
-        body: JSON.stringify(userPayload),
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Failed to create user. The username or email might already be taken.');
-        alert('User created successfully!');
-      });
+      // Creating a user with files is not yet supported by the register endpoint,
+      // so we'll just show an alert for now. This can be implemented later.
+      alert("Creating new vendors with documents is not yet supported. Please create the user first, then edit to add documents.");
+      return;
     }
 
     fetchPromise.then(() => {
       // Reset form fields and state
-      setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' });
+      setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' });
       setNewUserRequestTypes([]);
       setAdminView('viewUsers');
       // Re-fetch users to update the list
@@ -367,13 +381,9 @@ function App() {
       longitude: user.longitude || '',
       address: user.address || '',
       name: user.name || '',
-      digitalSignaturePath: user.digitalSignaturePath || '',
-      adhaarCardPath: user.adhaarCardPath || '',
-      voterIdPath: user.voterIdPath || '',
-      panCardPath: user.panCardPath || '',
-      shopRegistrationPath: user.shopRegistrationPath || '',
     });
     setNewUserRequestTypes(user.requestTypes ? Array.from(user.requestTypes) : []);
+    setNewUserFiles({}); // Clear any stale files
     setAdminView('createUser'); // Reuse the create user form for editing
   };
 
@@ -471,8 +481,9 @@ function App() {
               setNewUser={setNewUser}
               newUserRequestTypes={newUserRequestTypes}
               setNewUserRequestTypes={setNewUserRequestTypes}
-              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '', digitalSignaturePath: '', adhaarCardPath: '', voterIdPath: '', panCardPath: '', shopRegistrationPath: '' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
+              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
+              onFileChange={handleFileChange}
             />
         )}
         {loggedInUser.roles.includes('ADMIN') && adminView === 'viewUsers' && (

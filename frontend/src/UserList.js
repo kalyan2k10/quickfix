@@ -30,6 +30,26 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
                   <strong>Services:</strong> <span className="services-list">{user.requestTypes.join(', ')}</span>
                 </p>
               )}
+              {user.roles.includes('VENDOR') && user.hasDocuments && (
+                 <div className="document-links">
+                   <strong>Documents:</strong>
+                   {user.panCard && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/pancard`} target="_blank" rel="noopener noreferrer">PAN Card</a></div>
+                   )}
+                   {user.adhaarCard && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/adhaarcard`} target="_blank" rel="noopener noreferrer">Aadhaar Card</a></div>
+                   )}
+                    {user.digitalSignature && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/digitalsignature`} target="_blank" rel="noopener noreferrer">Digital Signature</a></div>
+                    )}
+                    {user.voterId && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/voterid`} target="_blank" rel="noopener noreferrer">Voter ID</a></div>
+                    )}
+                    {user.shopRegistration && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/shopregistration`} target="_blank" rel="noopener noreferrer">Shop Registration</a></div>
+                    )}
+                 </div>
+               )}
               <div className="user-actions">
                 <button onClick={() => onEditUser(user)} className="action-button edit-button">Edit</button>
                 <button onClick={() => onDeleteUser(user.id)} className="action-button delete-button">Delete</button>

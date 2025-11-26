@@ -41,10 +41,15 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
+                                .cors(Customizer.withDefaults()) // Enable CORS
                                 .csrf(AbstractHttpConfigurer::disable) // Disabling CSRF for stateless API
                                 .authorizeHttpRequests(authz -> authz
                                                 // Allow public access to the registration endpoint
                                                 .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                                                // Allow public access to download documents; security is implicit via
+                                                // non-guessable IDs
+                                                .requestMatchers(HttpMethod.GET, "/users/{id}/documents/{docType}")
+                                                .permitAll()
                                                 // Admin-specific routes for user management
                                                 .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN")

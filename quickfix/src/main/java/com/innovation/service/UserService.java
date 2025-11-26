@@ -73,12 +73,26 @@ public class UserService {
                     }
 
                     // Update Vendor KYC details
-                    user.setName(userDetails.getName());
-                    user.setDigitalSignaturePath(userDetails.getDigitalSignaturePath());
-                    user.setAdhaarCardPath(userDetails.getAdhaarCardPath());
-                    user.setVoterIdPath(userDetails.getVoterIdPath());
-                    user.setPanCardPath(userDetails.getPanCardPath());
-                    user.setShopRegistrationPath(userDetails.getShopRegistrationPath());
+                    user.setName(userDetails.getName()); // Always update name
+
+                    // Only update document if a new one is provided in the request
+                    if (userDetails.getDigitalSignature() != null) {
+                        user.setDigitalSignature(userDetails.getDigitalSignature());
+                    }
+                    if (userDetails.getAdhaarCard() != null) {
+                        user.setAdhaarCard(userDetails.getAdhaarCard());
+                    }
+                    if (userDetails.getVoterId() != null) {
+                        user.setVoterId(userDetails.getVoterId());
+                    }
+                    if (userDetails.getPanCard() != null) {
+                        user.setPanCard(userDetails.getPanCard());
+                    }
+                    // Note: shopRegistration is missing from the controller, but we'll add the
+                    // logic here
+                    if (userDetails.getShopRegistration() != null) {
+                        user.setShopRegistration(userDetails.getShopRegistration());
+                    }
 
                     // Update location
                     user.setAddress(userDetails.getAddress());
