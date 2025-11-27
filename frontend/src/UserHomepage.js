@@ -1,76 +1,44 @@
 import React from 'react';
 import './UserHomepage.css';
+import carImage from './images/car.jpeg';
+import keyImage from './images/key.jpeg';
+import mechanicImage from './images/mechanic.jpeg';
 
 const UserHomepage = ({ onGetRescued, onSelectService }) => {
     return ( 
         <div className="user-homepage">
-            <header>
-                <div className="container nav-content">
-                    <div className="logo">RESCUE®</div>
-                    <nav>
-                        <a href="#services">Services</a>
-                        <a href="#process">How it Works</a>
-                        <a href="#contact">Contact</a>
-                        <span>| Call: +91 9986 500 500</span>
-                    </nav>
-                </div>
-            </header>
-
-            <section id="hero">
-                <div className="container">
-                    <h1>Roadside Assistance Made Easy!</h1>
-                    <p>24/7 Vehicle Breakdown Services. On-spot Puncture, Battery Jumpstart, Towing & more.</p>
-                    <button onClick={onGetRescued} className="cta-button">GET RESCUED NOW</button>
-                </div>
-            </section>
-
-            <section id="process">
-                <div className="container">
-                    <h2 className="section-title">Get Rescued in 3 Easy Steps</h2>
-                    <div className="process-flow">
-                        <div className="flow-step">
-                            <h3>Connect with RESCUE</h3>
-                            <p>Click a service below to start your request.</p>
-                        </div>
-                        <div className="flow-arrow"></div>
-                        <div className="flow-step">
-                            <h3>Mechanic Despatched</h3>
-                            <p>The nearest available mechanic is assigned to you.</p>
-                        </div>
-                        <div className="flow-arrow"></div>
-                        <div className="flow-step">
-                            <h3>Get Rescued!</h3>
-                            <p>Our mechanic gets you moving quickly and safely.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+            
             <section id="services">
                 <div className="container">
-                    <h2 className="section-title">Our Premier Roadside Assistance Services</h2>
+                    <h2 className="section-title">Select your problem type</h2>
                     <div className="services-grid">
                         <div className="service-card" onClick={() => onSelectService('Flat Tyre')}>
+                            <img src={carImage} alt="Puncture Repair" className="service-image" />
                             <h4>Puncture Repair Assistance</h4>
                             <p className="price">Starts at ₹ 499</p>
                         </div>
                         <div className="service-card" onClick={() => onSelectService('Towing Service')}>
+                            <img src={carImage} alt="Car Towing" className="service-image" />
                             <h4>Car Towing Assistance</h4>
                             <p className="price">Starts at ₹ 2999</p>
                         </div>
                         <div className="service-card" onClick={() => onSelectService('Battery Jumpstart')}>
+                            <img src={carImage} alt="Battery Jumpstart" className="service-image" />
                             <h4>Battery Jumpstart</h4>
                             <p className="price">Starts at ₹ 599</p>
                         </div>
                         <div className="service-card" onClick={() => onSelectService('Out of Fuel')}>
+                            <img src={carImage} alt="Emergency Fuel" className="service-image" />
                             <h4>Emergency Fuel Delivery</h4>
                             <p className="price">Starts at ₹ 399</p>
                         </div>
                         <div className="service-card" onClick={() => onSelectService('Key Lockout')}>
+                            <img src={keyImage} alt="Key Recovery" className="service-image" />
                             <h4>Key Recovery Services</h4>
                             <p className="price">Starts at ₹ 999</p>
                         </div>
                         <div className="service-card" onClick={() => onSelectService('Minor Repairs')}>
+                            <img src={mechanicImage} alt="Minor Repairs" className="service-image" />
                             <h4>Minor Mechanical Repairs</h4>
                             <p className="price">Starts at ₹ 599</p>
                         </div>

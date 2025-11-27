@@ -7,6 +7,7 @@ import VendorDashboard from './VendorDashboard';
 import UserList from './UserList';
 import UserDashboard from './UserDashboard';
 import Login from './Login';
+import VehicleSelection from './VehicleSelection';
 
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [error, setError] = useState('');
   const [adminView, setAdminView] = useState('createUser'); // 'createUser' or 'viewUsers'
-  const [userView, setUserView] = useState('homepage'); // 'homepage' or 'dashboard'
+  const [userView, setUserView] = useState('vehicleSelection'); // 'vehicleSelection', 'homepage', or 'dashboard'
   const [newUserRequestTypes, setNewUserRequestTypes] = useState([]); // New state for admin creating user
   const [editingUser, setEditingUser] = useState(null); // State to hold user being edited
   const [newUserFiles, setNewUserFiles] = useState({}); // New state for file uploads
@@ -32,6 +33,7 @@ function App() {
   const [distance, setDistance] = useState(null);
   const [fare, setFare] = useState(null);
   const [vendorsWithDistances, setVendorsWithDistances] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   // Use the hook to safely load the map. Since the script is in index.html,
   // we just need to specify the libraries.
@@ -93,7 +95,7 @@ function App() {
         // Step 2: Based on role, fetch necessary additional data
         if (currentUser.roles.includes('ADMIN')) {
           // Admin needs the full user list
-          setUserView('homepage'); // Reset user view
+          setUserView('vehicleSelection'); // Reset user view
           fetch('/users', { headers: authHeaders }).then(res => res.json()).then(setUsers);
         } else if (currentUser.roles.includes('USER')) {
           // Check for any of the user's requests to restore state
@@ -407,7 +409,7 @@ function App() {
     setError('');
     setUserLocation(null);
     setActiveRequest(null);
-    setUserView('homepage');
+    setUserView('vehicleSelection');
   };
 
   if (!loggedInUser) {
@@ -440,6 +442,12 @@ function App() {
   const handleGoHome = (e) => {
     e.preventDefault();
     setNewRequest({ problemDescription: '', vehicleNumber: '', name: loggedInUser.username, email: loggedInUser.email, phoneNumber: '', otherProblem: '' });
+    setUserView('homepage'); // Go back to the services homepage
+  };
+
+  const handleVehicleSelect = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    // After selecting a vehicle, we move to the user homepage to select a service.
     setUserView('homepage');
   };
 
@@ -454,7 +462,7 @@ function App() {
           <h1>ZoomFix</h1>
         </div>
         <nav className="app-nav">
-          {loggedInUser?.roles.includes('USER') && userView !== 'homepage' && (
+          {loggedInUser?.roles.includes('USER') && userView === 'dashboard' && (
             <a href="#" onClick={handleGoHome}>Home</a>
           )}
           <a href="#" onClick={(e) => {e.preventDefault(); alert('Coming Soon!');}}>About</a>
@@ -495,8 +503,11 @@ function App() {
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
-        {loggedInUser.roles.includes('USER') && userView === 'homepage' && (
-          <UserHomepage onGetRescued={() => setUserView('dashboard')} onSelectService={handleSelectService} />
+        {loggedInUser.roles.includes('USER') && userView === 'vehicleSelection' && (
+          <VehicleSelection onVehicleSelect={handleVehicleSelect} />
+        )}
+        {loggedInUser.roles.includes('USER') && userView === 'homepage' && selectedVehicle && (
+          <UserHomepage onSelectService={handleSelectService} />
         )}
         {loggedInUser.roles.includes('USER') && userView === 'dashboard' && (
           <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} onBackToHome={() => setUserView('homepage')} />
