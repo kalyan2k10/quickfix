@@ -155,7 +155,13 @@ const AdminDashboard = ({
                 onChange={handleWorkerSelectionChange}
               >
                 {allWorkers.map((worker) => (
-                  <option key={worker.id} value={worker.id}>{worker.name || worker.username}</option>
+                  <option key={worker.id} value={worker.id}>
+                    {`${worker.name || worker.username} (${
+                      worker.requestTypes?.length > 0
+                        ? worker.requestTypes.join(', ').replace(/_/g, ' ')
+                        : 'No services'
+                    })`}
+                  </option>
                 ))}
               </select>
             </>

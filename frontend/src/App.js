@@ -504,7 +504,10 @@ function App() {
               onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setSelectedWorkers([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
               onFileChange={handleFileChange}
-              allWorkers={users.filter(u => u.roles.includes('WORKER'))}
+              allWorkers={users.filter(
+                // Only show users who are workers and are not the user currently being edited.
+                (u) => u.roles.includes('WORKER') && u.id !== editingUser?.id
+              )}
               selectedWorkers={selectedWorkers}
               setSelectedWorkers={setSelectedWorkers}
             />
