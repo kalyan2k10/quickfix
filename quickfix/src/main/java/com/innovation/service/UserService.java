@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
@@ -62,11 +63,16 @@ public class UserService {
                         user.setRoles(userDetails.getRoles());
                     }
 
-                    // If the user is a vendor, handle request types
-                    if (user.getRoles().contains("VENDOR")) {
-                        // It's mandatory for a vendor to have at least one service type
+                    // If the user is a vendor or worker, handle request types
+                    if (user.getRoles().contains("VENDOR") || user.getRoles().contains("WORKER")) {
                         if (userDetails.getRequestTypes() == null || userDetails.getRequestTypes().isEmpty()) {
-                            throw new IllegalArgumentException("A vendor must have at least one request type.");
+                            if (user.getRoles().contains("VENDOR")) {
+                                // For vendors, this is now dynamic, so we can clear it if no workers are
+                                // assigned.
+                                user.getRequestTypes().clear();
+                            } else {
+                                throw new IllegalArgumentException("A worker must have at least one request type.");
+                            }
                         }
                         user.setRequestTypes(userDetails.getRequestTypes());
                     } else {

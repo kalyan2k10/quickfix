@@ -81,10 +81,11 @@ const AdminDashboard = ({
           <select className="form-input" name="role" value={newUser.role} onChange={onInputChange}>
             <option value="USER">User</option>
             <option value="VENDOR">Vendor</option>
+            <option value="WORKER">Worker</option>
             <option value="ADMIN">Admin</option>
           </select>
 
-          {newUser.role === 'VENDOR' && (
+          {(newUser.role === 'VENDOR' || newUser.role === 'WORKER') && (
             <>
               <h3 className="form-section-header">Vendor Services</h3>
               <select
@@ -93,7 +94,7 @@ const AdminDashboard = ({
                 multiple
                 value={newUserRequestTypes}
                 onChange={handleRequestTypeChange}
-                required={newUser.role === 'VENDOR'}
+                required
               >
                 <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
                 {availableRequestTypes.map((type) => (

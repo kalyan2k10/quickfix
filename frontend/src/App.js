@@ -161,7 +161,7 @@ function App() {
     const userBlob = new Blob([JSON.stringify({
       ...newUser,
       roles: [newUser.role],
-      requestTypes: newUser.role === 'VENDOR' ? newUserRequestTypes : [],
+      requestTypes: (newUser.role === 'VENDOR' || newUser.role === 'WORKER') ? newUserRequestTypes : [],
     })], {
       type: 'application/json'
     });
@@ -505,6 +505,7 @@ function App() {
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
+        {loggedInUser.roles.includes('WORKER') && <WorkerDashboard loggedInUser={loggedInUser} />}
         {loggedInUser.roles.includes('USER') && userView === 'vehicleSelection' && (
           <VehicleSelection onVehicleSelect={handleVehicleSelect} />
         )}
