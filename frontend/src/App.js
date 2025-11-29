@@ -153,9 +153,11 @@ function App() {
 
   const handleUserFormSubmit = (event) => {
     event.preventDefault();
-    const authHeaders = { 'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`) };
+    const authHeaders = createAuthHeaders(credentials.username, credentials.password);
+    const multiPartAuthHeaders = { 'Authorization': authHeaders.Authorization };
 
     const formData = new FormData();
+
     const userBlob = new Blob([JSON.stringify({
       ...newUser,
       roles: [newUser.role],
@@ -177,7 +179,7 @@ function App() {
       // Update existing user
       fetchPromise = fetch(`/users/${editingUser.id}`, {
         method: 'PUT',
-        headers: authHeaders,
+        headers: multiPartAuthHeaders,
         body: formData,
       })
       .then(response => {
@@ -196,7 +198,7 @@ function App() {
       // Reset form fields and state
       setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' });
       setNewUserRequestTypes([]);
-      setAdminView('viewUsers');
+      setAdminView('viewUsers'); // Switch back to the user list
       // Re-fetch users to update the list
       return fetch('/users', { headers: authHeaders }); // Re-fetch users
     })

@@ -41,6 +41,11 @@ public class UserController {
         return userService.getVendors();
     }
 
+    @GetMapping("/workers")
+    public List<User> getWorkers() {
+        return userService.getUsersByRole("WORKER");
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
