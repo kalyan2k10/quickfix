@@ -100,23 +100,27 @@ const AdminDashboard = ({
             <option value="ADMIN">Admin</option>
           </select>
 
+          {newUser.role === 'WORKER' && (
+            <>
+              <h3 className="form-section-header">Worker Services</h3>
+                <select
+                  className="form-input"
+                  name="requestTypes"
+                  multiple
+                  value={newUserRequestTypes}
+                  onChange={handleRequestTypeChange}
+                  required
+                >
+                  <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
+                  {availableRequestTypes.map((type) => (
+                    <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
+                  ))}
+                </select>
+            </>
+          )}
+
           {(newUser.role === 'VENDOR' || newUser.role === 'WORKER') && (
             <>
-              <h3 className="form-section-header">Vendor Services</h3>
-              <select
-                className="form-input"
-                name="requestTypes"
-                multiple
-                value={newUserRequestTypes}
-                onChange={handleRequestTypeChange}
-                required
-              >
-                <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
-                {availableRequestTypes.map((type) => (
-                  <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
-                ))}
-              </select>
-
               <h3 className="form-section-header">Vendor KYC Details</h3>
               <input className="form-input" type="text" name="name" placeholder="Full Name or Shop Name" value={newUser.name || ''} onChange={onInputChange} required />
 

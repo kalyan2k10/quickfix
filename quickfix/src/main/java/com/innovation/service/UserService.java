@@ -44,9 +44,11 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        if (user.getRoles().contains("VENDOR")
-                && (user.getRequestTypes() == null || user.getRequestTypes().isEmpty())) {
-            throw new IllegalArgumentException("A vendor must have at least one request type.");
+        // If the user is a VENDOR, derive their request types from their assigned
+        // workers.
+        if (user.getRoles().contains("VENDOR")) {
+            Set<String> derivedRequestTypes = deriveRequestTypesFromWorkers(user.getWorkers());
+            user.setRequestTypes(derivedRequestTypes);
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -55,6 +57,9 @@ public class UserService {
     public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
+                    // The original roles of the user before any updates
+                    Set<String> originalRoles = new HashSet<>(user.getRoles());
+
                     user.setUsername(userDetails.getUsername());
                     user.setEmail(userDetails.getEmail());
 
@@ -63,27 +68,20 @@ public class UserService {
                         user.setRoles(userDetails.getRoles());
                     }
 
-                    // If the user is a vendor or worker, handle request types
-                    if (user.getRoles().contains("VENDOR") || user.getRoles().contains("WORKER")) {
-                        if (userDetails.getRequestTypes() == null || userDetails.getRequestTypes().isEmpty()) {
-                            if (user.getRoles().contains("VENDOR")) {
-                                // For vendors, this is now dynamic, so we can clear it if no workers are
-                                // assigned.
-                                user.getRequestTypes().clear();
-                            } else {
-                                throw new IllegalArgumentException("A worker must have at least one request type.");
-                            }
-                        }
-                        user.setRequestTypes(userDetails.getRequestTypes());
-                    } else {
-                        // If user is not a vendor, clear any existing request types
-                        user.getRequestTypes().clear();
-                    }
-
-                    // If the user is a VENDOR, update their assigned workers
+                    // If the user is a VENDOR, update their assigned workers and derive request
+                    // types
                     if (user.getRoles().contains("VENDOR")) {
-                        // The new set of workers comes from the userDetails object
                         user.setWorkers(userDetails.getWorkers());
+                        Set<String> derivedRequestTypes = deriveRequestTypesFromWorkers(user.getWorkers());
+                        user.setRequestTypes(derivedRequestTypes);
+                    }
+                    // If the user is a WORKER, update their request types from the payload
+                    else if (user.getRoles().contains("WORKER")) {
+                        user.setRequestTypes(userDetails.getRequestTypes());
+                    }
+                    // If the user is neither a VENDOR nor a WORKER, clear their request types
+                    else {
+                        user.getRequestTypes().clear();
                     }
 
                     // Update Vendor KYC details
@@ -123,6 +121,16 @@ public class UserService {
 
                     return userRepository.save(user);
                 });
+    }
+
+    private Set<String> deriveRequestTypesFromWorkers(Set<Long> workerIds) {
+        if (workerIds == null || workerIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        List<User> workers = userRepository.findAllById(workerIds);
+        return workers.stream()
+                .flatMap(worker -> worker.getRequestTypes().stream())
+                .collect(Collectors.toSet());
     }
 
     public boolean deleteUser(Long id) {
