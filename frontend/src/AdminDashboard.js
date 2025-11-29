@@ -118,6 +118,9 @@ const AdminDashboard = ({
               
               <label htmlFor="shopRegistration">Shop Registration Details</label>
               <input className="form-input" type="file" name="shopRegistration" id="shopRegistration" onChange={onFileChange} />
+              
+              <label htmlFor="userAgreement">User Agreement</label>
+              <input className="form-input" type="file" name="userAgreement" id="userAgreement" onChange={onFileChange} />
             </>
           )}
 

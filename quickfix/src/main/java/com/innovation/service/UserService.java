@@ -93,6 +93,9 @@ public class UserService {
                     if (userDetails.getShopRegistration() != null) {
                         user.setShopRegistration(userDetails.getShopRegistration());
                     }
+                    if (userDetails.getUserAgreement() != null) {
+                        user.setUserAgreement(userDetails.getUserAgreement());
+                    }
 
                     // Update location
                     user.setAddress(userDetails.getAddress());

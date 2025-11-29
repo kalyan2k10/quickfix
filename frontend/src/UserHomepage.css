@@ -1,17 +1,21 @@
-/* --- General Styling & Color Palette --- */
+/* --- Root Variables for a Neon Cyberpunk Theme --- */
 :root {
-    --primary-color: #007bff; /* Trustworthy Blue */
-    --accent-color: #ff7e00; /* Action Orange (Rescue/Urgency) */
-    --dark-text: #333;
-    --light-bg: #f8f9fa;
-    --white: #fff;
-    --shadow: rgba(0, 0, 0, 0.1);
+    --primary-color: #39FF14; /* Neon Green */
+    --primary-hover: #28e000;
+    --dark-bg: #121212; /* Main dark background */
+    --light-bg: #1a1a1a; /* Slightly lighter dark shade */
+    --card-bg: #1f1f1f; /* Card background */
+    --text-light: #e0e0e0; /* Off-white text */
+    --text-dark: #39FF14; /* Main text color (now neon green) */
+    --text-muted: #888888; /* Muted gray text */
+    --border-color: #333333; /* Dark border */
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
 .user-homepage {
     font-family: Arial, sans-serif;
-    color: var(--dark-text);
-    background-color: var(--white);
+    color: var(--text-light);
+    background-color: var(--dark-bg);
 }
 
 .user-homepage .container {
@@ -25,8 +29,8 @@
 .user-homepage .cta-button {
     display: inline-block;
     padding: 12px 30px;
-    background-color: var(--accent-color);
-    color: var(--white);
+    background-color: var(--primary-color);
+    color: #000;
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
@@ -38,22 +42,22 @@
 }
 
 .user-homepage .cta-button:hover {
-    background-color: #e66e00; /* Darker orange on hover */
+    background-color: var(--primary-hover);
 }
 
 .user-homepage .section-title {
     text-align: center;
     font-size: 2.2em;
     margin-bottom: 40px;
-    color: var(--primary-color);
+    color: var(--text-dark);
 }
 
 /* --- Header/Navigation --- */
 .user-homepage header {
-    background-color: var(--primary-color);
-    color: var(--white);
+    background-color: var(--card-bg);
+    color: var(--text-light);
     padding: 10px 0;
-    border-bottom: 4px solid var(--accent-color);
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .user-homepage header .nav-content {
@@ -68,7 +72,7 @@
 }
 
 .user-homepage header nav a {
-    color: var(--white);
+    color: var(--text-light);
     text-decoration: none;
     margin-left: 20px;
     font-weight: 600;
@@ -76,9 +80,8 @@
 
 /* --- Hero Section --- */
 .user-homepage #hero {
-    /* background: url('placeholder-vehicle-bg.jpg') no-repeat center center/cover; */
-    background-color: #343a40; /* Dark overlay */
-    color: var(--white);
+    background-color: var(--light-bg);
+    color: var(--text-light);
     text-align: center;
     padding: 100px 20px;
 }
@@ -95,7 +98,7 @@
 
 /* --- Process Section (3 Steps) --- */
 .user-homepage #process {
-    background-color: var(--light-bg);
+    background-color: var(--dark-bg);
     padding: 60px 0;
 }
 
@@ -108,8 +111,8 @@
 }
 
 .user-homepage .flow-step {
-    background-color: var(--white);
-    border: 3px solid var(--primary-color);
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
     border-radius: 50%;
     width: 220px;
     height: 220px;
@@ -125,17 +128,18 @@
 
 .user-homepage .flow-step:hover {
     transform: scale(1.05);
+    border-color: var(--primary-color);
 }
 
 .user-homepage .flow-step h3 {
-    color: var(--accent-color);
+    color: var(--primary-color);
     margin-bottom: 10px;
 }
 
 .user-homepage .flow-arrow {
     width: 50px;
     height: 20px;
-    background-color: var(--accent-color);
+    background-color: var(--primary-color);
     position: relative;
     clip-path: polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%);
 }
@@ -143,6 +147,7 @@
 /* --- Services Section --- */
 .user-homepage #services {
     padding: 60px 0;
+    background-color: var(--light-bg);
 }
 
 .user-homepage .services-grid {
@@ -152,8 +157,8 @@
 }
 
 .user-homepage .service-card {
-    background-color: var(--white);
-    border: 1px solid #ddd;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 25px;
     text-align: center;
@@ -167,15 +172,17 @@
     height: 150px;
     object-fit: cover;
     border-radius: 8px 8px 0 0; /* Rounded corners only at the top */
+    filter: grayscale(50%);
 }
 
 .user-homepage .service-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 15px var(--shadow);
+    border-color: var(--primary-color);
 }
 
 .user-homepage .service-card h4 {
-    color: var(--primary-color);
+    color: var(--text-light);
     font-size: 1.2em;
     margin: 10px 0;
 }
@@ -183,13 +190,13 @@
 .user-homepage .service-card .price {
     font-size: 1.5em;
     font-weight: bold;
-    color: var(--accent-color);
+    color: var(--primary-color);
 }
 
 /* --- Footer --- */
 .user-homepage footer {
-    background-color: #343a40;
-    color: #ddd;
+    background-color: var(--card-bg);
+    color: var(--text-muted);
     padding: 40px 0;
     font-size: 0.9em;
 }
@@ -201,7 +208,7 @@
 }
 
 .user-homepage footer h5 {
-    color: var(--white);
+    color: var(--text-light);
     margin-bottom: 15px;
     font-size: 1.1em;
 }
@@ -212,7 +219,7 @@
 }
 
 .user-homepage footer ul li a {
-    color: #ccc;
+    color: var(--text-muted);
     text-decoration: none;
     line-height: 2;
 }
@@ -221,6 +228,6 @@
     text-align: center;
     padding-top: 20px;
     margin-top: 30px;
-    border-top: 1px solid #555;
+    border-top: 1px solid var(--border-color);
     grid-column: 1 / -1;
 }

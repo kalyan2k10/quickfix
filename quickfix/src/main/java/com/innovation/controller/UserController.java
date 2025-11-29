@@ -68,7 +68,8 @@ public class UserController {
             @RequestPart(value = "digitalSignature", required = false) MultipartFile digitalSignature,
             @RequestPart(value = "adhaarCard", required = false) MultipartFile adhaarCard,
             @RequestPart(value = "voterId", required = false) MultipartFile voterId,
-            @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration)
+            @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
+            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
             throws IOException {
 
         // Manually set the byte[] data on the user object from the MultipartFile
@@ -86,6 +87,9 @@ public class UserController {
         }
         if (shopRegistration != null && !shopRegistration.isEmpty()) {
             user.setShopRegistration(shopRegistration.getBytes());
+        }
+        if (userAgreement != null && !userAgreement.isEmpty()) {
+            user.setUserAgreement(userAgreement.getBytes());
         }
 
         return userService.updateUser(id, user)
@@ -127,6 +131,9 @@ public class UserController {
                 break;
             case "shopregistration":
                 documentData = user.getShopRegistration();
+                break;
+            case "useragreement":
+                documentData = user.getUserAgreement();
                 break;
             default:
                 return ResponseEntity.badRequest().build();

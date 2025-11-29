@@ -54,8 +54,8 @@ const UserHomepage = ({ onGetRescued, onSelectService }) => {
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px' }}>
                         <div style={{ width: '250px', textAlign: 'center' }}>
-                            <h4 style={{ color: 'var(--accent-color)' }}>30 Mins Reach Time</h4>
-                            <p>Mechanics located nearby ensure we reach you within 30 minutes.</p>
+                            <h4 style={{ color: 'var(--accent-color)' }}>10 Mins Reach Time</h4>
+                            <p>Mechanics located nearby ensure we reach you within 10 minutes.</p>
                         </div>
                         <div style={{ width: '250px', textAlign: 'center' }}>
                             <h4 style={{ color: 'var(--accent-color)' }}>Trained Mechanics</h4>

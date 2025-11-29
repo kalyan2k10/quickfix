@@ -1,35 +1,23 @@
 import React from 'react';
 import './VehicleSelection.css';
-import carImage from './images/car.jpeg';
-import bikeImage from './images/bike.jpeg';
-import mechanicImage from './images/mechanic.jpeg';
-import keyImage from './images/key.jpeg';
 
 const VehicleSelection = ({ onVehicleSelect }) => {
     return (
         <div className="vehicle-selection-page">
-            <section className="hero-section">
-                <div className="hero-content">
-                    <h1>Don't worry we got your back!!</h1>
-                    <img src={mechanicImage} alt="Mechanic" className="hero-image" />
-                </div>
-            </section>
-
             <div className="selection-container">
-                <h2 className="page-title">Quick question to get quick response</h2>
-                <p className="page-subtitle">Choose your vehicle type to get started.</p>
+                <h1 className="page-title">Don't worry, we got your back!</h1>
+                <p className="page-subtitle">First, select your vehicle type to find the right help.</p>
                 <div className="vehicle-options">
-                    <div className="vehicle-card" onClick={() => onVehicleSelect('car')}>
-                        <img src={carImage} alt="Car" className="vehicle-image" />
-                        <button className="vehicle-button">Car</button>
+                    {/* Two Wheeler Knob */}
+                    <div className="vehicle-knob" onClick={() => onVehicleSelect('bike')}>
+                        <div className="knob-icon">🏍️</div>
+                        <div className="knob-label">Two Wheeler</div>
                     </div>
-                    <div className="vehicle-card" onClick={() => onVehicleSelect('bike')}>
-                        <img src={bikeImage} alt="Bike" className="vehicle-image" />
-                        <button className="vehicle-button">Bike</button>
-                    </div>
-                    <div className="vehicle-card" onClick={() => onVehicleSelect('Key Lockout')}>
-                        <img src={keyImage} alt="Key" className="vehicle-image" />
-                        <button className="vehicle-button">Key Lockout</button>
+
+                    {/* Four Wheeler Knob */}
+                    <div className="vehicle-knob" onClick={() => onVehicleSelect('car')}>
+                        <div className="knob-icon">🚗</div>
+                        <div className="knob-label">Four Wheeler</div>
                     </div>
                 </div>
             </div>

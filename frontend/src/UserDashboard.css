@@ -1,3 +1,13 @@
+/* --- Root Variables for a Neon Cyberpunk Theme --- */
+:root {
+    --primary-color: #39FF14; /* Neon Green */
+    --dark-bg: #121212;
+    --card-bg: #1f1f1f;
+    --text-light: #e0e0e0;
+    --text-muted: #888888;
+    --border-color: #333333;
+}
+
 /* Styles for the User Dashboard Map View */
 .map-view {
     height: 450px;
@@ -5,7 +15,8 @@
     margin-top: 20px;
     border-radius: 10px;
     overflow: hidden; /* Ensures the map corners are rounded */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
 }
 
 /* This is the missing piece: Give the Google Map container a height */
@@ -20,7 +31,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border-left-color: #09f;
+    border-left-color: var(--primary-color);
     margin: 20px auto;
     animation: spin 1s ease infinite;
 }
@@ -31,18 +42,18 @@
 
 /* Custom class for permanent tooltips to make them more visible */
 .vendor-tooltip {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid #777;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--primary-color);
     border-radius: 4px;
     padding: 4px 8px;
     font-weight: bold;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    color: var(--primary-color);
 }
 
 /* Styles for ETA info */
 .eta-info {
-    background-color: #f0f8ff;
-    border-left: 4px solid #007bff;
+    background-color: var(--card-bg);
+    border-left: 4px solid var(--primary-color);
     padding: 10px 15px;
     margin: 15px 0;
 }
@@ -67,18 +78,18 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     text-align: center;
-    background-color: #f9f9f9;
+    background-color: var(--card-bg);
 }
 
 .service-option:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #007bff;
+    border-color: var(--primary-color);
 }
 
 .service-icon {
@@ -91,13 +102,13 @@
     align-items: center;
     text-align: center;
     margin: 1.5rem 0;
-    color: #888;
+    color: var(--text-muted);
 }
 
 .or-divider::before, .or-divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .or-divider span {

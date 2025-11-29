@@ -48,6 +48,9 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
                     {user.shopRegistration && (
                       <div><a href={`http://localhost:8080/users/${user.id}/documents/shopregistration`} target="_blank" rel="noopener noreferrer">Shop Registration</a></div>
                     )}
+                    {user.userAgreement && (
+                      <div><a href={`http://localhost:8080/users/${user.id}/documents/useragreement`} target="_blank" rel="noopener noreferrer">User Agreement</a></div>
+                    )}
                  </div>
                )}
               <div className="user-actions">

@@ -1,159 +1,198 @@
+/* --- Root Variables for a Neon Cyberpunk Theme --- */
+:root {
+  --primary-color: #39FF14; /* Neon Green */
+  --primary-hover: #28e000;
+  --dark-bg: #121212; /* Main dark background */
+  --light-bg: #1a1a1a; /* Slightly lighter dark shade */
+  --card-bg: #1f1f1f; /* Card background */
+  --text-light: #e0e0e0; /* Off-white text */
+  --text-dark: #39FF14; /* Main text color (now neon green) */
+  --text-muted: #888888; /* Muted gray text */
+  --border-color: #333333; /* Dark border */
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --input-focus-shadow: 0 0 0 3px rgba(57, 255, 20, 0.3);
+}
+
+/* --- General Body Styles --- */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-light);
+}
+
+/* --- Main Login Container --- */
 .login-container {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #fff;
 }
 
-/* Left side with art/branding */
+/* --- Left Side - Branding & Art --- */
 .login-art-section {
   width: 50%;
-  background: linear-gradient(to bottom right, #001f3f, #003366); /* Navy Blue Gradient */
-  color: white;
+  background: var(--light-bg);
+  color: var(--text-light);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: Add a subtle background pattern */
+.login-art-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 80%, rgba(57, 255, 20, 0.1), transparent 30%);
+  opacity: 0.5;
 }
 
 .art-content h1 {
-  font-size: 3.5em;
-  margin-bottom: 20px;
+  font-size: 3rem;
+  margin-bottom: 1rem;
   font-weight: 700;
+  line-height: 1.2;
+  color: var(--primary-color); /* Make title neon green */
 }
 
 .art-content p {
-  font-size: 1.3em;
-  max-width: 400px;
-  margin-bottom: 40px;
-  opacity: 0.9;
+  font-size: 1.1rem;
+  max-width: 450px;
+  margin-bottom: 2.5rem;
+  color: var(--text-light);
+  opacity: 0.8;
 }
 
 .features-preview {
   display: flex;
   gap: 20px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .feature-preview-item {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 10px 20px;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
   font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Right side with the form */
+/* --- Right Side - Authentication Form --- */
 .login-form-section {
   width: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px;
-  background-color: #f8f9fa;
+  background-color: var(--dark-bg);
 }
 
 .form-container {
   width: 100%;
-  max-width: 400px;
-  background: #fff;
+  max-width: 420px;
+  background: var(--card-bg);
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
+/* --- Tabs --- */
 .tabs {
   display: flex;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--dark-bg);
+  padding: 4px;
 }
 
 .tab {
   flex: 1;
-  padding: 15px;
+  padding: 0.75rem;
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 1.1em;
+  font-size: 1rem;
   font-weight: 600;
-  color: #888;
+  color: var(--text-muted);
   position: relative;
-  transition: color 0.3s;
+  transition: all 0.3s ease;
+  border-radius: 0.375rem;
 }
 
 .tab.active {
-  color: #333;
+  color: var(--primary-color);
+  background-color: var(--card-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: #FF6600; /* Orange Accent */
-  border-radius: 3px 3px 0 0;
-}
-
+/* --- Form Content --- */
 .form-content h2 {
   text-align: center;
-  margin-bottom: 25px;
-  font-size: 1.8em;
-  color: #333;
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  color: var(--text-dark);
+  font-weight: 700;
 }
 
-.form-section-title {
-  font-size: 0.9em;
+/* --- Form Inputs --- */
+.form-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: var(--light-bg);
+  color: var(--text-light);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-shadow);
+}
+
+/* --- Form Submit Button --- */
+.form-container button[type="submit"] {
+  width: 100%;
+  background-color: var(--primary-color);
+  color: #000; /* Black text on neon green button for readability */
+  border: none;
+  padding: 14px 25px;
+  border-radius: 0.5rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #555;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 1rem;
 }
 
-/* Responsive Design */
+.form-container button[type="submit"]:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* --- Responsive Design --- */
 @media (max-width: 900px) {
   .login-container {
     flex-direction: column;
   }
 
-  .login-art-section,
+  .login-art-section {
+    display: none; /* Hide the art section on smaller screens */
+  }
+
   .login-form-section {
     width: 100%;
+    min-height: 100vh;
   }
-
-  .login-art-section {
-    min-height: 300px;
-    padding: 30px;
-  }
-
-  .login-form-section {
-    padding: 20px;
-  }
-}
-
-/* This is a temporary fix for the body style override */
-body {
-  background-size: cover;
-  background-color: #fff; /* Override any other body background styles */
-}
-
-/* Style buttons inside the login/signup form specifically */
-.form-container button[type="submit"] {
-  background-color: #FF6600; /* Orange for primary actions */
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 25px;
-  font-size: 1.1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-.form-container button[type="submit"]:hover {
-  background-color: #e65c00; /* Darker Orange */
-  transform: translateY(-2px);
 }

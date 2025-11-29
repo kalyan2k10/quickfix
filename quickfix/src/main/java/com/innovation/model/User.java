@@ -41,6 +41,9 @@ public class User {
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
     private byte[] shopRegistration;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] userAgreement;
 
     public User() {
     }
@@ -182,6 +185,14 @@ public class User {
         this.shopRegistration = shopRegistration;
     }
 
+    public byte[] getUserAgreement() {
+        return userAgreement;
+    }
+
+    public void setUserAgreement(byte[] userAgreement) {
+        this.userAgreement = userAgreement;
+    }
+
     // --- Transient properties for JSON serialization ---
     // These methods are not stored in the DB but are included in JSON responses.
 
@@ -217,7 +228,14 @@ public class User {
 
     @JsonProperty("hasDocuments")
     public boolean hasAnyDocument() {
-        return hasPanCard() || hasAdhaarCard() || hasDigitalSignature() || hasVoterId() || hasShopRegistration();
+        return hasPanCard() || hasAdhaarCard() || hasDigitalSignature() || hasVoterId() || hasShopRegistration()
+                || hasUserAgreement();
+    }
+
+    @JsonProperty("userAgreement")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasUserAgreement() {
+        return this.userAgreement != null && this.userAgreement.length > 0;
     }
 
 }
