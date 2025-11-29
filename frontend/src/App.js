@@ -26,6 +26,7 @@ function App() {
   const [editingUser, setEditingUser] = useState(null); // State to hold user being edited
   const [newUserFiles, setNewUserFiles] = useState({}); // New state for file uploads
   const [selectedWorkers, setSelectedWorkers] = useState([]); // New state for assigning workers to a vendor
+  const [vendorWorkers, setVendorWorkers] = useState([]); // New state for the logged-in vendor's workers
   const [serviceRequests, setServiceRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' });
   const [userLocation, setUserLocation] = useState(null);
@@ -113,6 +114,13 @@ function App() {
         } else if (currentUser.roles.includes('VENDOR')) {
           // Vendor needs service requests
           fetchServiceRequests(authHeaders);
+          // Vendor also needs the details of their assigned workers
+          if (currentUser.workers && currentUser.workers.length > 0) {
+            Promise.all(
+              currentUser.workers.map(workerId => fetch(`/users/${workerId}`, { headers: authHeaders }).then(res => res.json()))
+            ).then(setVendorWorkers)
+             .catch(err => console.error("Failed to fetch vendor's workers", err));
+          }
         }
 
         if (currentUser.roles.includes('USER')) {
@@ -289,21 +297,20 @@ function App() {
     .catch(handleApiError);
   };
 
-  const handleRequestUpdate = (requestId, status) => {
+  const handleAssignWorkerToRequest = (requestId, workerId) => {
     const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
-    fetch(`/requests/${requestId}/${status}`, {
+    fetch(`/requests/${requestId}/assign/${workerId}`, {
       method: 'POST',
       headers: authHeaders,
     })
     .then(res => {
-        if (!res.ok) throw new Error(`Failed to ${status} request.`);
+        if (!res.ok) throw new Error(`Failed to assign worker to request.`);
         return res.json();
     })
     .then(updatedRequest => {
         // Refresh the list of open requests for the vendor
         fetchServiceRequests(authHeaders);
-        // Only show this generic alert on 'accept'
-        if (status === 'accept') alert(`Request has been accepted.`);
+        alert(`Worker has been assigned to the request.`);
     })
     .catch(handleApiError);
   };
@@ -419,8 +426,10 @@ function App() {
     setUsers([]);
     setServiceRequests([]);
     setError('');
+    setVendorWorkers([]);
     setUserLocation(null);
     setActiveRequest(null);
+    setNewRequest({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' }); // Reset the request form
     setUserView('vehicleSelection');
   };
 
@@ -520,7 +529,7 @@ function App() {
               onDeleteUser={handleDeleteUser}
             />
         )}
-        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
+        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} workers={vendorWorkers} onAssignWorker={handleAssignWorkerToRequest} />}
         {loggedInUser.roles.includes('USER') && userView === 'vehicleSelection' && (
           <VehicleSelection onVehicleSelect={handleVehicleSelect} />
         )}
