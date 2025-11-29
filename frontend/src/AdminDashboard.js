@@ -17,6 +17,9 @@ const AdminDashboard = ({
   setNewUserRequestTypes,
   onCancelEdit,
   onViewUsersClick,
+  allWorkers, // New prop: list of all available workers
+  selectedWorkers, // New prop: array of selected worker IDs
+  setSelectedWorkers, // New prop: function to update selected workers
 }) => {
   const mapRef = useRef(null);
 
@@ -57,6 +60,18 @@ const AdminDashboard = ({
       }
     }
     setNewUserRequestTypes(selectedValues);
+  };
+
+  const handleWorkerSelectionChange = (event) => {
+    const { options } = event.target;
+    const selectedIds = [];
+    for (let i = 0, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        // The value is a string, so convert it to a number
+        selectedIds.push(Number(options[i].value));
+      }
+    }
+    setSelectedWorkers(selectedIds);
   };
 
   return (
@@ -122,6 +137,23 @@ const AdminDashboard = ({
 
               <label htmlFor="userAgreement">User Agreement</label>
               <input className="form-input" type="file" name="userAgreement" id="userAgreement" onChange={onFileChange} />
+            </>
+          )}
+          
+          {newUser.role === 'VENDOR' && (
+            <>
+              <h3 className="form-section-header">Assign Workers</h3>
+              <select
+                className="form-input"
+                name="workers"
+                multiple
+                value={selectedWorkers}
+                onChange={handleWorkerSelectionChange}
+              >
+                {allWorkers.map((worker) => (
+                  <option key={worker.id} value={worker.id}>{worker.name || worker.username}</option>
+                ))}
+              </select>
             </>
           )}
 

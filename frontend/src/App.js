@@ -25,6 +25,7 @@ function App() {
   const [newUserRequestTypes, setNewUserRequestTypes] = useState([]); // New state for admin creating user
   const [editingUser, setEditingUser] = useState(null); // State to hold user being edited
   const [newUserFiles, setNewUserFiles] = useState({}); // New state for file uploads
+  const [selectedWorkers, setSelectedWorkers] = useState([]); // New state for assigning workers to a vendor
   const [serviceRequests, setServiceRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ problemDescription: '', vehicleNumber: '', name: '', email: '', phoneNumber: '', otherProblem: '' });
   const [userLocation, setUserLocation] = useState(null);
@@ -161,6 +162,7 @@ function App() {
     const userBlob = new Blob([JSON.stringify({
       ...newUser,
       roles: [newUser.role],
+      workers: newUser.role === 'VENDOR' ? selectedWorkers : [],
       requestTypes: (newUser.role === 'VENDOR' || newUser.role === 'WORKER') ? newUserRequestTypes : [],
     })], {
       type: 'application/json'
@@ -204,6 +206,7 @@ function App() {
       // Reset form fields and state
       setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' });
       setNewUserRequestTypes([]);
+      setSelectedWorkers([]);
       setAdminView('viewUsers'); // Switch back to the user list
       // Re-fetch users to update the list
       return fetch('/users', { headers: authHeaders }); // Re-fetch users
@@ -393,6 +396,7 @@ function App() {
       name: user.name || '',
     });
     setNewUserRequestTypes(user.requestTypes ? Array.from(user.requestTypes) : []);
+    setSelectedWorkers(user.workers || []);
     setNewUserFiles({}); // Clear any stale files
     setAdminView('createUser'); // Reuse the create user form for editing
   };
@@ -497,9 +501,12 @@ function App() {
               setNewUser={setNewUser}
               newUserRequestTypes={newUserRequestTypes}
               setNewUserRequestTypes={setNewUserRequestTypes}
-              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setAdminView('viewUsers'); }}
+              onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setSelectedWorkers([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
               onFileChange={handleFileChange}
+              allWorkers={users.filter(u => u.roles.includes('WORKER'))}
+              selectedWorkers={selectedWorkers}
+              setSelectedWorkers={setSelectedWorkers}
             />
         )}
         {loggedInUser.roles.includes('ADMIN') && adminView === 'viewUsers' && (

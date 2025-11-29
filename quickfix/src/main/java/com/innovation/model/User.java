@@ -64,6 +64,11 @@ public class User {
     @Column(name = "request_type")
     private Set<String> requestTypes = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "vendor_workers", joinColumns = @JoinColumn(name = "vendor_id"))
+    @Column(name = "worker_id")
+    private Set<Long> workers = new HashSet<>();
+
     // Getters and Setters
 
     public long getId() {
@@ -192,6 +197,14 @@ public class User {
 
     public void setUserAgreement(byte[] userAgreement) {
         this.userAgreement = userAgreement;
+    }
+
+    public Set<Long> getWorkers() {
+        return workers;
+    }
+
+    public void setWorkers(Set<Long> workers) {
+        this.workers = workers;
     }
 
     // --- Transient properties for JSON serialization ---

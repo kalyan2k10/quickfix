@@ -19,6 +19,7 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
               <th>Username</th>
               <th>Email</th>
               <th>Role(s)</th>
+              <th>Assigned Workers</th>
               <th>Service Types</th>
               <th>Actions</th>
             </tr>
@@ -30,6 +31,14 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.roles.join(', ')}</td>
+                <td>
+                  {user.roles.includes('VENDOR') && user.workers?.length > 0 ? (
+                    user.workers.map(workerId => {
+                      const worker = users.find(u => u.id === workerId);
+                      return <span key={workerId} className="worker-tag">{worker ? (worker.name || worker.username) : `ID: ${workerId}`}</span>;
+                    })
+                  ) : 'N/A'}
+                </td>
                 <td>
                   {(() => {
                     if (user.roles.includes('WORKER')) {

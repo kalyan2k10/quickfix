@@ -80,6 +80,12 @@ public class UserService {
                         user.getRequestTypes().clear();
                     }
 
+                    // If the user is a VENDOR, update their assigned workers
+                    if (user.getRoles().contains("VENDOR")) {
+                        // The new set of workers comes from the userDetails object
+                        user.setWorkers(userDetails.getWorkers());
+                    }
+
                     // Update Vendor KYC details
                     user.setName(userDetails.getName()); // Always update name
 
