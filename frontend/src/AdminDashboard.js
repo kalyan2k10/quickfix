@@ -113,7 +113,7 @@ const AdminDashboard = ({
                 >
                   <option value="" disabled>Select service types (hold Ctrl/Cmd to select multiple)</option>
                   {availableRequestTypes.map((type) => (
-                    <option key={type.value} value={type.value.toUpperCase().replace(/ /g, '_')}>{type.label}</option>
+                    <option key={type.value} value={type.value}>{type.label}</option>
                   ))}
                 </select>
             </>

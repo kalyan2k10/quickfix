@@ -27,6 +27,10 @@ public class ServiceRequest {
     @JoinColumn(name = "intended_vendor_id")
     private User intendedVendor;
 
+    @ManyToOne
+    @JoinColumn(name = "worker_id")
+    private User assignedWorker;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Getters and Setters
@@ -76,6 +80,14 @@ public class ServiceRequest {
 
     public void setIntendedVendor(User intendedVendor) {
         this.intendedVendor = intendedVendor;
+    }
+
+    public User getAssignedWorker() {
+        return assignedWorker;
+    }
+
+    public void setAssignedWorker(User assignedWorker) {
+        this.assignedWorker = assignedWorker;
     }
 
     // Other getters and setters...

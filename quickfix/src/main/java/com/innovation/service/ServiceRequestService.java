@@ -98,4 +98,39 @@ public class ServiceRequestService {
                     return requestRepository.save(request);
                 });
     }
+
+    public Optional<ServiceRequest> assignWorkerToRequest(Long requestId, Long workerId) {
+        // Get the currently authenticated vendor
+        String vendorUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User vendor = userRepository.findByUsername(vendorUsername)
+                .orElseThrow(() -> new IllegalStateException("Current user is not a valid vendor."));
+
+        // Find the worker to be assigned
+        User worker = userRepository.findById(workerId)
+                .orElseThrow(() -> new IllegalArgumentException("Worker with ID " + workerId + " not found."));
+
+        // Find the request
+        return requestRepository.findById(requestId)
+                .map(request -> {
+                    // --- Validation Checks ---
+                    // 1. Ensure the request is open
+                    if (request.getStatus() != RequestStatus.OPEN) {
+                        throw new IllegalStateException("Request is not open for assignment.");
+                    }
+                    // 2. Ensure the worker belongs to the vendor
+                    if (!vendor.getWorkers().contains(worker.getId())) {
+                        throw new IllegalStateException("This worker is not assigned to your account.");
+                    }
+                    // 3. Ensure the worker is qualified for the job
+                    if (!worker.getRequestTypes().contains(request.getProblemDescription())) {
+                        throw new IllegalStateException(
+                                "This worker is not qualified for the service: " + request.getProblemDescription());
+                    }
+
+                    request.setAssignedVendor(vendor);
+                    request.setAssignedWorker(worker); // You will need to add this field to your ServiceRequest model
+                    request.setStatus(RequestStatus.ASSIGNED);
+                    return requestRepository.save(request);
+                });
+    }
 }

@@ -7,6 +7,7 @@ import VendorDashboard from './VendorDashboard';
 import UserList from './UserList';
 import UserDashboard from './UserDashboard';
 import Login from './Login';
+import { availableRequestTypes } from './constants';
 import VehicleSelection from './VehicleSelection';
 
 
@@ -279,12 +280,17 @@ function App() {
     if (problem === 'Other' && newRequest.otherProblem) {
       problem = newRequest.otherProblem;
     }
-    const requestData = { ...newRequest, problemDescription: problem };
+    // As per your request, we will now send the request type in a 'requestTypes' array
+    // to be consistent with the rest of the application's logic.
+    const requestData = {
+      ...newRequest,
+      requestTypes: [problem] // The backend should read this and set problemDescription
+    };
 
     fetch(`/requests`, {
       method: 'POST',
       headers: authHeaders,
-      body: JSON.stringify(newRequest),
+      body: JSON.stringify(requestData),
     })
     .then(res => {
         if (!res.ok) throw new Error('Failed to submit request.');
@@ -455,7 +461,12 @@ function App() {
 
   const handleSelectService = (service) => {
     // Set the problem description in the state for the UserDashboard
-    setNewRequest(prev => ({ ...prev, problemDescription: service }));
+    // Find the service object from constants to use its 'value'
+    const selectedService = availableRequestTypes.find(s => s.label === service);
+    setNewRequest(prev => ({
+      ...prev,
+      problemDescription: selectedService ? selectedService.value : service,
+    }));
     // Switch to the dashboard view
     setUserView('dashboard');
   };

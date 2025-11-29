@@ -54,4 +54,12 @@ public class ServiceRequestController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{requestId}/assign/{workerId}")
+    public ResponseEntity<ServiceRequest> assignWorkerToRequest(@PathVariable Long requestId,
+            @PathVariable Long workerId) {
+        return requestService.assignWorkerToRequest(requestId, workerId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

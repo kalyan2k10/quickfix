@@ -1,8 +1,8 @@
 export const availableRequestTypes = [
-  { label: "Flat Tyre", value: "Flat Tyre" },
-  { label: "Battery Jumpstart", value: "Battery Jumpstart" },
-  { label: "Towing Service", value: "Towing Service" },
-  { label: "Out of Fuel", value: "Out of Fuel" },
-  { label: "Key Lockout", value: "Key Lockout" },
-  { label: "Minor Repairs", value: "Minor Repairs" },
+  { label: "Flat Tyre", value: "FLAT_TYRE" },
+  { label: "Battery Jumpstart", value: "BATTERY_JUMPSTART" },
+  { label: "Towing Service", value: "TOWING_SERVICE" },
+  { label: "Out of Fuel", value: "OUT_OF_FUEL" },
+  { label: "Key Lockout", value: "KEY_LOCKOUT" },
+  { label: "Minor Repairs", value: "MINOR_REPAIRS" },
 ];

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './UserDashboard.css';
+import { availableRequestTypes } from './constants';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api'; // Google Maps for all map views
 
 // A simple component for a loading spinner
@@ -130,18 +131,22 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
 
   // == STATE 3: Vendor Assigned, Live Tracking ==
   if (activeRequest && activeRequest.status === 'ASSIGNED') {
-    const assignedVendor = activeRequest.assignedVendor;
+    const assignedWorker = activeRequest.assignedWorker;
+    const assignedVendor = activeRequest.assignedVendor; // The vendor who employs the worker
     const userPosition = [userLocation.latitude, userLocation.longitude];
     // Use liveVendorLocation if available, otherwise fall back to the initial location.
+    // We track the worker's location, so we use assignedWorker here.
     const currentVendorPosition = liveVendorLocation 
-      ? [liveVendorLocation.latitude, liveVendorLocation.longitude] 
-      : [assignedVendor.latitude, assignedVendor.longitude];
+      ? [liveVendorLocation.latitude, liveVendorLocation.longitude]
+      : [assignedWorker.latitude, assignedWorker.longitude];
 
     return (
       <>
         <div className="form-card">
           <h2>Vendor on the way!</h2>
-          <p><strong>{assignedVendor.username}</strong> has accepted your request and is en route.</p>
+          <p>
+            <strong>{assignedWorker.name || assignedWorker.username}</strong> from <strong>{assignedVendor.name || assignedVendor.username}</strong> has taken up your task and is en route.
+          </p>
           {routeInfo && (
             <div className="eta-info">
               <p>
@@ -175,7 +180,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                 {/* Vendor's Marker */}
                 <Marker
                   position={{ lat: currentVendorPosition[0], lng: currentVendorPosition[1] }}
-                  title={`Vendor: ${assignedVendor.username}`}
+                  title={`Worker: ${assignedWorker.username}`}
                   icon={{ 
                     path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                     scale: 7,
@@ -238,13 +243,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         <p>Let's get you back on the road. Please provide a few details.</p>
         <form onSubmit={(e) => { e.preventDefault(); onRequestSubmit(); }}>
             <select name="problemDescription" value={newRequest.problemDescription} onChange={onInputChange} className="form-input" required>
-                <option value="" disabled>Select service type...</option>
-                <option value="Flat Tyre">Flat Tyre</option>
-                <option value="Battery Jumpstart">Battery Jumpstart</option>
-                <option value="Towing Service">Towing Service</option>
-                <option value="Out of Fuel">Out of Fuel</option>
-                <option value="Key Lockout">Key Lockout</option>
-                <option value="Minor Repairs">Minor Repairs</option>
+                <option value="" disabled>Select service type...</option> 
+                {availableRequestTypes.map(type => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                ))}
                 <option value="Other">Other Issue</option>
             </select>
             <input

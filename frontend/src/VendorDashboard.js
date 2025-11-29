@@ -12,8 +12,8 @@ const VendorDashboard = ({ requests, workers, onAssignWorker }) => {
   };
 
   const getEligibleWorkers = (requestType) => {
-    if (!workers || workers.length === 0) return [];
-    // The request type from the backend is already in the correct format (e.g., 'FLAT_TYRE')
+    if (!workers || workers.length === 0 || !requestType) return [];
+    // Match the request's problem description (e.g., "FLAT_TYRE") with the worker's available services.
     return workers.filter(worker => worker.requestTypes.includes(requestType));
   };
 
