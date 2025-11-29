@@ -53,9 +53,36 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
-    public User addUser(@RequestBody User user) {
+    public User addUser(
+            @RequestPart("user") User user,
+            @RequestPart(value = "panCard", required = false) MultipartFile panCard,
+            @RequestPart(value = "digitalSignature", required = false) MultipartFile digitalSignature,
+            @RequestPart(value = "adhaarCard", required = false) MultipartFile adhaarCard,
+            @RequestPart(value = "voterId", required = false) MultipartFile voterId,
+            @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
+            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
+            throws IOException {
+
+        if (panCard != null && !panCard.isEmpty()) {
+            user.setPanCard(panCard.getBytes());
+        }
+        if (digitalSignature != null && !digitalSignature.isEmpty()) {
+            user.setDigitalSignature(digitalSignature.getBytes());
+        }
+        if (adhaarCard != null && !adhaarCard.isEmpty()) {
+            user.setAdhaarCard(adhaarCard.getBytes());
+        }
+        if (voterId != null && !voterId.isEmpty()) {
+            user.setVoterId(voterId.getBytes());
+        }
+        if (shopRegistration != null && !shopRegistration.isEmpty()) {
+            user.setShopRegistration(shopRegistration.getBytes());
+        }
+        if (userAgreement != null && !userAgreement.isEmpty()) {
+            user.setUserAgreement(userAgreement.getBytes());
+        }
         return userService.addUser(user);
     }
 

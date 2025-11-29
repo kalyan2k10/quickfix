@@ -188,10 +188,16 @@ function App() {
         setEditingUser(null); // Clear editing state
       });
     } else {
-      // Creating a user with files is not yet supported by the register endpoint,
-      // so we'll just show an alert for now. This can be implemented later.
-      alert("Creating new vendors with documents is not yet supported. Please create the user first, then edit to add documents.");
-      return;
+      // Create a new user
+      fetchPromise = fetch('/users', { // The endpoint for creating a user
+        method: 'POST',
+        headers: multiPartAuthHeaders,
+        body: formData,
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to create user.');
+        alert('User created successfully!');
+      });
     }
 
     fetchPromise.then(() => {
