@@ -389,7 +389,7 @@ function App() {
       username: user.username,
       password: '', // Password should not be pre-filled for security
       email: user.email,
-      role: user.roles.includes('ADMIN') ? 'ADMIN' : (user.roles.includes('VENDOR') ? 'VENDOR' : 'USER'),
+      role: user.roles.includes('ADMIN') ? 'ADMIN' : (user.roles.includes('VENDOR') ? 'VENDOR' : (user.roles.includes('WORKER') ? 'WORKER' : 'USER')),
       latitude: user.latitude || '',
       longitude: user.longitude || '',
       address: user.address || '',
@@ -518,7 +518,6 @@ function App() {
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} onUpdateRequest={handleRequestUpdate} loggedInUser={loggedInUser} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} fetchServiceRequests={fetchServiceRequests} isLoaded={isLoaded} loadError={loadError} />}
-        {loggedInUser.roles.includes('WORKER') && <WorkerDashboard loggedInUser={loggedInUser} />}
         {loggedInUser.roles.includes('USER') && userView === 'vehicleSelection' && (
           <VehicleSelection onVehicleSelect={handleVehicleSelect} />
         )}
