@@ -19,6 +19,7 @@ const AdminDashboard = ({
   onViewUsersClick,
   allWorkers, // New prop: list of all available workers
   selectedWorkers, // New prop: array of selected worker IDs
+  allVendors, // New prop: list of all available vendors
   setSelectedWorkers, // New prop: function to update selected workers
 }) => {
   const mapRef = useRef(null);
@@ -116,6 +117,21 @@ const AdminDashboard = ({
                     <option key={type.value} value={type.value}>{type.label}</option>
                   ))}
                 </select>
+            </>
+          )}
+
+          {newUser.role === 'WORKER' && (
+            <>
+              <h3 className="form-section-header">Assign to Vendor</h3>
+              <select
+                className="form-input"
+                name="assignedVendorId"
+                value={newUser.assignedVendorId || ''}
+                onChange={onInputChange}
+              >
+                <option value="">None</option>
+                {allVendors.map(vendor => <option key={vendor.id} value={vendor.id}>{vendor.name || vendor.username}</option>)}
+              </select>
             </>
           )}
 

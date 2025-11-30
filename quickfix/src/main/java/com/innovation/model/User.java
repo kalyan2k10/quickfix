@@ -69,6 +69,8 @@ public class User {
     @Column(name = "worker_id")
     private Set<Long> workers = new HashSet<>();
 
+    private Long assignedVendorId;
+
     // Getters and Setters
 
     public long getId() {
@@ -205,6 +207,14 @@ public class User {
 
     public void setWorkers(Set<Long> workers) {
         this.workers = workers;
+    }
+
+    public Long getAssignedVendorId() {
+        return assignedVendorId;
+    }
+
+    public void setAssignedVendorId(Long assignedVendorId) {
+        this.assignedVendorId = assignedVendorId;
     }
 
     // --- Transient properties for JSON serialization ---

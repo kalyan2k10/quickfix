@@ -407,6 +407,7 @@ function App() {
       longitude: user.longitude || '',
       address: user.address || '',
       name: user.name || '',
+      assignedVendorId: user.assignedVendorId || null,
     });
     setNewUserRequestTypes(user.requestTypes ? Array.from(user.requestTypes) : []);
     setSelectedWorkers(user.workers || []);
@@ -524,10 +525,11 @@ function App() {
               onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setSelectedWorkers([]); setAdminView('viewUsers'); }}
               onViewUsersClick={() => setAdminView('viewUsers')}
               onFileChange={handleFileChange}
-              allWorkers={users.filter(
-                // Only show users who are workers and are not the user currently being edited.
-                (u) => u.roles.includes('WORKER') && u.id !== editingUser?.id
+              allWorkers={users.filter(u =>
+                // For the vendor form, show only workers who have chosen this vendor
+                u.roles.includes('WORKER') && u.assignedVendorId === editingUser?.id
               )}
+              allVendors={users.filter(u => u.roles.includes('VENDOR'))}
               selectedWorkers={selectedWorkers}
               setSelectedWorkers={setSelectedWorkers}
             />

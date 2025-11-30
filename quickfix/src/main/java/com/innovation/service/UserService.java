@@ -77,6 +77,8 @@ public class UserService {
                     }
                     // If the user is a WORKER, update their request types from the payload
                     else if (user.getRoles().contains("WORKER")) {
+                        // Update which vendor this worker is assigned to
+                        user.setAssignedVendorId(userDetails.getAssignedVendorId());
                         user.setRequestTypes(userDetails.getRequestTypes());
                     }
                     // If the user is neither a VENDOR nor a WORKER, clear their request types
