@@ -440,6 +440,16 @@ function App() {
     setUserView('vehicleSelection');
   };
 
+  // Function to fetch and update the user list, to be used for polling
+  const refreshUsers = () => {
+    if (loggedInUser && loggedInUser.roles.includes('ADMIN')) {
+      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      fetch('/users', { headers: authHeaders })
+        .then(res => res.json())
+        .then(setUsers)
+        .catch(err => console.error("Failed to refresh users:", err)); // Silently handle errors in background
+    }
+  };
   if (!loggedInUser) {
     return (
       <div className="app-container">
@@ -523,7 +533,11 @@ function App() {
               newUserRequestTypes={newUserRequestTypes}
               setNewUserRequestTypes={setNewUserRequestTypes}
               onCancelEdit={() => { setEditingUser(null); setNewUser({ username: '', password: '', email: '', role: 'USER', latitude: '', longitude: '', address: '', name: '' }); setNewUserRequestTypes([]); setSelectedWorkers([]); setAdminView('viewUsers'); }}
-              onViewUsersClick={() => setAdminView('viewUsers')}
+              onViewUsersClick={() => {
+                setAdminView('viewUsers');
+                // Refresh the user list when switching to the view
+                fetch('/users', { headers: createAuthHeaders(loggedInUser.username, credentials.password) }).then(res => res.json()).then(setUsers);
+              }}
               onFileChange={handleFileChange}
               allWorkers={users.filter(u =>
                 // For the vendor form, show only workers who have chosen this vendor
@@ -540,6 +554,9 @@ function App() {
               onShowCreateUser={() => { setEditingUser(null); setAdminView('createUser'); }} 
               onEditUser={handleEditUser}
               onDeleteUser={handleDeleteUser}
+              onRefreshUsers={refreshUsers} // Pass the refresh function here
+              isLoaded={isLoaded} // Pass the loading status to UserList
+              loadError={loadError} // Pass any loading errors to UserList
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} workers={vendorWorkers} onAssignWorker={handleAssignWorkerToRequest} />}

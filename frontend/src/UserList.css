@@ -140,3 +140,22 @@
   background-color: #28a745; /* Green */
   color: #fff;
 }
+
+/* --- Map InfoWindow Styling --- */
+.map-infowindow {
+  background-color: #2d2d2d; /* Darker background for the popup */
+  color: var(--text-light);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  max-width: 250px;
+}
+
+.map-infowindow h4 {
+  margin: 0 0 8px 0;
+  color: var(--primary-color);
+}
+
+.map-infowindow p {
+  margin: 4px 0;
+  font-size: 0.85rem;
+}
