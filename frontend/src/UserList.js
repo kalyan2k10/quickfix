@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { availableRequestTypes } from './constants';
 import './UserList.css';
  
-const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
+const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefreshUsers }) => {
+  useEffect(() => {
+    // Set up an interval to refresh the user list every 5 seconds
+    const intervalId = setInterval(() => {
+      if (onRefreshUsers) {
+        onRefreshUsers();
+      }
+    }, 5000); // 5 seconds
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [onRefreshUsers]);
+
+  // Call onRefreshUsers immediately upon component mounting
+  useEffect(() => {
+    if (onRefreshUsers) {
+      onRefreshUsers();
+    }
+  }, []);
+
   return (
     <div className="user-list-container">
       <div className="user-list-header">
@@ -19,6 +38,7 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
               <th>Username</th>
               <th>Email</th>
               <th>Role(s)</th>
+              <th>Status</th>
               <th>Assigned Workers</th>
               <th>Service Types</th>
               <th>Actions</th>
@@ -31,6 +51,11 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser }) => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.roles.join(', ')}</td>
+                <td>
+                  <span className={`status-tag status-${(user.status || 'IDLE').toLowerCase()}`}>
+                    {user.status || 'IDLE'}
+                  </span>
+                </td>
                 <td>
                   {user.roles.includes('VENDOR') && user.workers?.length > 0 ? (
                     user.workers.map(workerId => {

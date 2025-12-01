@@ -1,5 +1,6 @@
 package com.innovation.controller;
 
+import com.innovation.model.UserActivityStatus;
 import com.innovation.model.User;
 import com.innovation.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -136,6 +138,14 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        String statusStr = payload.get("status");
+        UserActivityStatus status = UserActivityStatus.valueOf(statusStr);
+        userService.updateUserStatus(id, status);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/documents/{docType}")

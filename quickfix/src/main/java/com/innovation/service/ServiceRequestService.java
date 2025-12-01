@@ -6,6 +6,7 @@ import com.innovation.model.User;
 import com.innovation.repository.ServiceRequestRepository;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +16,16 @@ public class ServiceRequestService {
 
     private final ServiceRequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final UserStatusService userStatusService;
 
-    public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository) {
+    public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
+            UserStatusService userStatusService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
+        this.userStatusService = userStatusService;
     }
 
+    @Transactional
     public ServiceRequest createRequest(ServiceRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
@@ -80,6 +85,7 @@ public class ServiceRequestService {
                 });
     }
 
+    @Transactional
     public Optional<ServiceRequest> completeRequestByUser(Long requestId) {
         // Get the currently authenticated user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -95,10 +101,15 @@ public class ServiceRequestService {
                         throw new IllegalStateException("Request cannot be completed by this user at this time.");
                     }
                     request.setStatus(RequestStatus.COMPLETED);
+
+                    // --- Update User and Worker Statuses to COMPLETED ---
+                    userStatusService.transitionToCompleted(request.getRequestingUser(), request.getAssignedWorker());
+
                     return requestRepository.save(request);
                 });
     }
 
+    @Transactional
     public Optional<ServiceRequest> assignWorkerToRequest(Long requestId, Long workerId) {
         // Get the currently authenticated vendor
         String vendorUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -130,6 +141,10 @@ public class ServiceRequestService {
                     request.setAssignedVendor(vendor);
                     request.setAssignedWorker(worker); // You will need to add this field to your ServiceRequest model
                     request.setStatus(RequestStatus.ASSIGNED);
+
+                    // --- Update User and Worker Statuses ---
+                    userStatusService.transitionToAssigned(request.getRequestingUser(), worker);
+
                     return requestRepository.save(request);
                 });
     }

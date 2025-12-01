@@ -1,8 +1,10 @@
 package com.innovation.service;
 
 import com.innovation.model.User;
+import com.innovation.model.UserActivityStatus;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +19,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserStatusService userStatusService; // Inject UserStatusService
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            UserStatusService userStatusService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userStatusService = userStatusService;
     }
 
     public List<User> getAllUsers() {
@@ -43,6 +48,7 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    @Transactional
     public User addUser(User user) {
         // If the user is a VENDOR, derive their request types from their assigned
         // workers.
@@ -54,6 +60,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public Optional<User> updateUser(Long id, User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -135,6 +142,7 @@ public class UserService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
     public boolean deleteUser(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
@@ -143,6 +151,7 @@ public class UserService {
         return false;
     }
 
+    @Transactional
     public Optional<User> updateUserLocation(Long id, User locationData) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -150,6 +159,14 @@ public class UserService {
                     user.setLongitude(locationData.getLongitude());
                     return userRepository.save(user);
                 });
+    }
+
+    @Transactional
+    public void updateUserStatus(Long userId, UserActivityStatus status) {
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setStatus(status);
+            userRepository.save(user);
+        });
     }
 
     public List<User> getVendorsByRequestType(String requestType) {

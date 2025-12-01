@@ -6,3 +6,10 @@ export const availableRequestTypes = [
   { label: "Key Lockout", value: "KEY_LOCKOUT" },
   { label: "Minor Repairs", value: "MINOR_REPAIRS" },
 ];
+
+export const UserActivityStatus = {
+  IDLE: 'IDLE',
+  WAITING: 'WAITING',
+  ASSIGNED: 'ASSIGNED',
+  COMPLETED: 'COMPLETED',
+};

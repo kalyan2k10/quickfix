@@ -114,3 +114,29 @@
   color: #007bff;
   border: 1px solid rgba(0, 123, 255, 0.3);
 }
+
+/* --- Status Tag Styling --- */
+.status-tag {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.status-idle {
+  background-color: #444;
+  color: #ccc;
+}
+.status-waiting {
+  background-color: #ffc107; /* Amber */
+  color: #000;
+}
+.status-assigned {
+  background-color: #007bff; /* Blue */
+  color: #fff;
+}
+.status-completed {
+  background-color: #28a745; /* Green */
+  color: #fff;
+}

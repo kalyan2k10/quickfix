@@ -27,6 +27,9 @@ public class User {
     // New fields for Vendor KYC
     private String name; // Full name of the vendor/shop owner
 
+    @Enumerated(EnumType.STRING)
+    private UserActivityStatus status = UserActivityStatus.IDLE;
+
     @Lob
     @Column(columnDefinition = "MEDIUMBLOB")
     private byte[] digitalSignature;
@@ -151,6 +154,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public UserActivityStatus getStatus() {
+        return status == null ? UserActivityStatus.IDLE : status;
+    }
+
+    public void setStatus(UserActivityStatus status) {
+        this.status = status;
     }
 
     public byte[] getDigitalSignature() {

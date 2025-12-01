@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './UserDashboard.css';
-import { availableRequestTypes } from './constants';
+import { availableRequestTypes, UserActivityStatus } from './constants';
 import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api'; // Google Maps for all map views
 
 // A simple component for a loading spinner
@@ -25,6 +25,22 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     anchor: new window.google.maps.Point(20, 20),
   };
 
+  // Helper function to update user status
+  const updateUserStatus = (status) => {
+    // We need the user's ID. We can fetch it from the /me endpoint.
+    fetch('/users/me', { headers: authHeaders })
+      .then(res => res.json())
+      .then(currentUser => {
+        fetch(`/users/${currentUser.id}/status`, {
+          method: 'PUT',
+          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: status }),
+        });
+      })
+      .catch(console.error);
+  };
+
+
   // Polling effect to check request status
   useEffect(() => {
     if (activeRequest && activeRequest.status === 'OPEN') {
@@ -34,6 +50,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
           .then(updatedRequest => {
             if (updatedRequest.status !== 'OPEN') {
               setActiveRequest(updatedRequest);
+              // When vendor accepts, user state becomes ASSIGNED
+              if (updatedRequest.status === 'ASSIGNED') {
+                updateUserStatus(UserActivityStatus.ASSIGNED);
+              }
               clearInterval(interval);
             }
           })
@@ -156,7 +176,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
             </div>
           )}
           <div className="request-actions">
-            <button className="complete" onClick={() => onCompleteRequest(activeRequest.id)}>Mark as Complete & Pay</button>
+            <button className="complete" onClick={() => {
+              // The backend now handles all status updates for user and worker.
+              onCompleteRequest(activeRequest.id);
+            }}>Mark as Complete & Pay</button>
           </div>
         </div>
         <div className="user-list-section">
@@ -239,7 +262,11 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   return (
     <>
       <div className="form-card">
-        <h2>Request Assistance</h2>
+        <h2>Request Assistance
+          <button onClick={() => updateUserStatus(UserActivityStatus.IDLE)} style={{fontSize: '0.6rem', marginLeft: '1rem', cursor: 'pointer'}}>
+            Reset to Idle
+          </button>
+        </h2>
         <p>Let's get you back on the road. Please provide a few details.</p>
         <form onSubmit={(e) => { e.preventDefault(); onRequestSubmit(); }}>
             <select name="problemDescription" value={newRequest.problemDescription} onChange={onInputChange} className="form-input" required>
@@ -274,7 +301,11 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               <input className="form-input" type="text" name="otherProblem" placeholder="Please describe the issue" value={newRequest.otherProblem} onChange={onInputChange} required />
             )}
 
-            <button type="submit" disabled={!newRequest.problemDescription} className="broadcast-button">
+            <button type="submit" disabled={!newRequest.problemDescription} className="broadcast-button" onClick={() => {
+              // When user raises request, state becomes WAITING
+              // Note: This happens optimistically. The actual submission is handled by the form's onSubmit.
+              updateUserStatus(UserActivityStatus.WAITING);
+            }}>
                 Find Help Now
             </button>
         </form>
