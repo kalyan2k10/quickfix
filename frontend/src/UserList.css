@@ -20,6 +20,12 @@
   color: var(--text-light);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Added some space between elements */
+}
+
 .user-list-header {
   display: flex;
   justify-content: space-between;
@@ -158,4 +164,41 @@
 .map-infowindow p {
   margin: 4px 0;
   font-size: 0.85rem;
+}
+
+/* --- View Switcher Styling --- */
+.view-switcher {
+  display: flex;
+  gap: 0.5rem; /* Space between the two buttons */
+}
+
+.view-button {
+  background-color: var(--light-bg); /* Dark background for inactive state */
+  color: var(--text-light);
+  border: 2px solid var(--border-color); /* Subtle border */
+  padding: 10px 20px;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase; /* Consistent text styling */
+  letter-spacing: 0.5px;
+}
+
+.view-button:hover:not(.active) {
+  background-color: #2a2a2a; /* Slightly lighter on hover */
+  border-color: #555;
+  transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.view-button.active {
+  background-color: rgba(57, 255, 20, 0.1); /* Neon green glow background */
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color); /* Bright neon border for active state */
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.5); /* Neon glow effect */
+}
+
+.view-button:focus {
+  outline: none; /* Remove default browser outline */
 }
