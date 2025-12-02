@@ -25,8 +25,12 @@ const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests 
 
   const getEligibleWorkers = (requestType) => {
     if (!workers || workers.length === 0 || !requestType) return [];
-    // Match the request's problem description (e.g., "FLAT_TYRE") with the worker's available services.
-    return workers.filter(worker => worker.requestTypes.includes(requestType));
+    
+    return workers.filter(worker => {
+      const isAvailable = worker.status === 'IDLE' || worker.status === 'COMPLETED';
+      const canDoJob = worker.requestTypes.includes(requestType);
+      return isAvailable && canDoJob;
+    });
   };
 
   const openRequests = requests.filter(req => req.status === 'OPEN');

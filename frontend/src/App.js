@@ -278,10 +278,20 @@ function App() {
   const refreshServiceRequests = () => {
     if (loggedInUser && loggedInUser.roles.includes('VENDOR')) {
       const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      
+      // Fetch open service requests
       fetch('/requests', { headers: authHeaders })
         .then(res => res.json())
         .then(setServiceRequests)
         .catch(err => console.error("Failed to refresh service requests:", err)); // Silently handle errors
+
+      // Also, re-fetch the status of all assigned workers to ensure the list is live
+      if (loggedInUser.workers && loggedInUser.workers.length > 0) {
+        Promise.all(
+          loggedInUser.workers.map(workerId => fetch(`/users/${workerId}`, { headers: authHeaders }).then(res => res.json()))
+        ).then(setVendorWorkers)
+         .catch(err => console.error("Failed to refresh vendor's workers", err));
+      }
     }
   };
 
