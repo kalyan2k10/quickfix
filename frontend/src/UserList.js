@@ -19,20 +19,18 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
     return () => clearInterval(intervalId);
   }, [onRefreshUsers]);
 
-  const usersWithLocation = users.filter(user => user.latitude && user.longitude);
-
   const mapContainerStyle = {
     width: '100%',
     height: '600px',
   };
 
   // Calculate the center of the map based on user locations
-  const getMapCenter = () => {
+  const getMapCenter = (usersWithLocation) => {
     if (usersWithLocation.length === 0) {
       return { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore if no users have locations
     }
 
-    const latSum = usersWithLocation.reduce((sum, user) => sum + user.latitude, 0);
+    const latSum = usersWithLocation.reduce((sum, user) => sum + parseFloat(user.latitude), 0);
     const lngSum = usersWithLocation.reduce((sum, user) => sum + user.longitude, 0);
 
     return {
@@ -74,11 +72,14 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
       return <div>Loading Map...</div>;
     }
 
+    // Filter for users with location right before rendering the map
+    const usersWithLocation = users.filter(user => user.latitude && user.longitude);
+
     // If we reach here, isLoaded is true, so window.google is available.
     return (
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        center={getMapCenter()}
+        center={getMapCenter(usersWithLocation)}
         zoom={12}
         onLoad={() => setSelectedUser(null)} // Clear selected user on map load/reload
       >
