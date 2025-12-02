@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './VendorDashboard.css';
 
-const VendorDashboard = ({ requests, workers, onAssignWorker }) => {
+const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests }) => {
   const [selectedWorkers, setSelectedWorkers] = useState({}); // State to hold { requestId: workerId }
 
+  useEffect(() => {
+    // Set up an interval to refresh the service requests every 2 seconds
+    const intervalId = setInterval(() => {
+      if (onRefreshRequests) {
+        onRefreshRequests();
+      }
+    }, 2000); // 2 seconds
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [onRefreshRequests]);
+  
   const handleWorkerSelection = (requestId, workerId) => {
     setSelectedWorkers(prev => ({
       ...prev,

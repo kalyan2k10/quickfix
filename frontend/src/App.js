@@ -274,6 +274,17 @@ function App() {
       .catch(handleApiError);
   };
 
+  // Function to fetch and update service requests for vendors, for polling
+  const refreshServiceRequests = () => {
+    if (loggedInUser && loggedInUser.roles.includes('VENDOR')) {
+      const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+      fetch('/requests', { headers: authHeaders })
+        .then(res => res.json())
+        .then(setServiceRequests)
+        .catch(err => console.error("Failed to refresh service requests:", err)); // Silently handle errors
+    }
+  };
+
   const handleRequestSubmit = () => {
     const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
     let problem = newRequest.problemDescription;
@@ -559,7 +570,13 @@ function App() {
               loadError={loadError} // Pass any loading errors to UserList
             />
         )}
-        {loggedInUser.roles.includes('VENDOR') && <VendorDashboard requests={serviceRequests} workers={vendorWorkers} onAssignWorker={handleAssignWorkerToRequest} />}
+        {loggedInUser.roles.includes('VENDOR') && 
+            <VendorDashboard 
+              requests={serviceRequests} 
+              workers={vendorWorkers} 
+              onAssignWorker={handleAssignWorkerToRequest} 
+              onRefreshRequests={refreshServiceRequests} // Pass the refresh function
+            />}
         {loggedInUser.roles.includes('USER') && userView === 'vehicleSelection' && (
           <VehicleSelection onVehicleSelect={handleVehicleSelect} />
         )}
