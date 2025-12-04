@@ -576,8 +576,6 @@ function App() {
               onEditUser={handleEditUser}
               onDeleteUser={handleDeleteUser}
               onRefreshUsers={refreshUsers} // Pass the refresh function here
-              isLoaded={isLoaded} // Pass the loading status to UserList
-              loadError={loadError} // Pass any loading errors to UserList
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && 
