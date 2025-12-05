@@ -35,8 +35,8 @@
 }
 
 .service-tag {
-  background-color: rgba(57, 255, 20, 0.15); /* A subtle neon green background */
-  color: var(--primary-color); /* Neon green text */
+  background-color: rgba(4, 217, 255, 0.15); /* A subtle neon blue background */
+  color: var(--primary-color); /* Neon blue text */
   border: 1px solid var(--primary-color);
   padding: 8px 15px;
   border-radius: 20px;

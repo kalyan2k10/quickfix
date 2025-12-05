@@ -1,7 +1,7 @@
 /* --- Root Variables for a Neon Cyberpunk Theme --- */
 :root {
-    --primary-color: #39FF14; /* Neon Green */
-    --primary-hover: #28e000;
+    --primary-color: #04d9ff; /* Neon Blue */
+    --primary-hover: #00b8e6; /* Darker Neon Blue */
     --dark-bg: #121212; /* Main dark background */
     --light-bg: #1a1a1a; /* Slightly lighter dark shade */
     --card-bg: #1f1f1f; /* Card background */
