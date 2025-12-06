@@ -234,10 +234,20 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   if (activeRequest && activeRequest.status === 'OPEN') {
     return (
       <div className="form-card">
-        <h2>Waiting for Vendor Confirmation</h2>
-        <p>Your request for "<strong>{activeRequest.problemDescription}</strong>" has been sent.</p>
-        <p>We are finding a nearby vendor for you...</p>
+        <h2>Awaiting Vendor Acceptance</h2>
+        <p>Your request for "<strong>{activeRequest.problemDescription.replace(/_/g, ' ')}</strong>" has been sent.</p>
         <Spinner />
+        {activeRequest.intendedVendor ? (
+          <div className="vendor-info-waiting">
+            <p>We are waiting for <strong>{activeRequest.intendedVendor.name || activeRequest.intendedVendor.username}</strong> to accept your request located in</p>
+            <p className="vendor-address">
+              {activeRequest.intendedVendor.address}
+            </p>
+            <p className="small-text">If they don't accept in time, we will automatically find the next nearest vendor.</p>
+          </div>
+        ) : (
+          <p>We are broadcasting your request to all nearby vendors...</p>
+        )}
         <p><em>You will be automatically updated once a vendor accepts.</em></p>
       </div>
     );
