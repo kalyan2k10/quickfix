@@ -23,7 +23,7 @@ public class ServiceRequestService {
     private final UserStatusService userStatusService;
     private final UserService userService;
 
-    private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 30;
+    private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 60;
 
     @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
