@@ -13,6 +13,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+const userIcon = new L.Icon({
+  iconUrl: 'https://maps.google.com/mapfiles/kml/shapes/man.png',
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+});
+
 
 const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests, loggedInUser }) => {
   const [selectedWorkers, setSelectedWorkers] = useState({}); // State to hold { requestId: workerId }
@@ -109,7 +115,7 @@ const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests,
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {openRequests.map(req => (
               req.requestingUser.latitude && req.requestingUser.longitude && (
-                <Marker key={req.id} position={[req.requestingUser.latitude, req.requestingUser.longitude]}>
+                <Marker key={req.id} position={[req.requestingUser.latitude, req.requestingUser.longitude]} icon={userIcon}>
                   <Popup>
                     <b>{req.requestingUser.username}</b><br />
                     {req.problemDescription.replace(/_/g, ' ')}

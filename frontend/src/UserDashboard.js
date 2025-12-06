@@ -25,6 +25,12 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     anchor: new window.google.maps.Point(20, 20),
   };
 
+  const workerIcon = {
+    url: 'https://maps.google.com/mapfiles/kml/shapes/motorcycling.png', // Motorcycle icon for the worker
+    scaledSize: new window.google.maps.Size(40, 40),
+    anchor: new window.google.maps.Point(20, 20),
+  };
+
   // Helper function to update user status
   const updateUserStatus = (status) => {
     // We need the user's ID. We can fetch it from the /me endpoint.
@@ -207,16 +213,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                 <Marker
                   position={{ lat: currentVendorPosition[0], lng: currentVendorPosition[1] }}
                   title={`Worker: ${assignedWorker.username}`}
-                  icon={{ 
-                    path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                    scale: 7,
-                    rotation: vehicleBearing,
-                    fillColor: "#007bff",
-                    fillOpacity: 1,
-                    strokeWeight: 2,
-                    strokeColor: "white",
-                    anchor: new window.google.maps.Point(0, 2.5),
-                  }}
+                  icon={workerIcon}
                 />
                 {/* Directions/Route */}
                 {directions && (

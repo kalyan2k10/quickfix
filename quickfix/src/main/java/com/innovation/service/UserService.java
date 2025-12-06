@@ -1,13 +1,17 @@
 package com.innovation.service;
 
+import com.innovation.model.RequestStatus;
+import com.innovation.model.ServiceRequest;
 import com.innovation.model.User;
 import com.innovation.model.UserActivityStatus;
+import com.innovation.repository.ServiceRequestRepository;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -19,13 +23,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ServiceRequestRepository serviceRequestRepository;
     private final UserStatusService userStatusService; // Inject UserStatusService
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            UserStatusService userStatusService) {
+            UserStatusService userStatusService, ServiceRequestRepository serviceRequestRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userStatusService = userStatusService;
+        this.serviceRequestRepository = serviceRequestRepository;
     }
 
     public List<User> getAllUsers() {
@@ -144,11 +150,49 @@ public class UserService {
 
     @Transactional
     public boolean deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
+        User userToDelete = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        // Consolidate all requests associated with this user
+        List<ServiceRequest> associatedRequests = new ArrayList<>();
+        associatedRequests.addAll(serviceRequestRepository.findByAssignedWorker(userToDelete));
+        associatedRequests.addAll(serviceRequestRepository.findByAssignedVendor(userToDelete));
+        associatedRequests.addAll(serviceRequestRepository.findByIntendedVendor(userToDelete));
+
+        // 1. Check for active requests
+        boolean hasActiveRequests = associatedRequests.stream()
+                .anyMatch(req -> req.getStatus() == RequestStatus.OPEN || req.getStatus() == RequestStatus.ASSIGNED);
+
+        if (hasActiveRequests) {
+            // Prevent deletion if the user is part of any active request
+            throw new IllegalStateException(
+                    "Cannot delete user. They are currently assigned to one or more active service requests.");
         }
-        return false;
+
+        // 2. Nullify references in completed/denied requests
+        associatedRequests.forEach(req -> {
+            if (req.getAssignedWorker() != null && req.getAssignedWorker().getId() == userToDelete.getId()) {
+                req.setAssignedWorker(null);
+            }
+            if (req.getAssignedVendor() != null && req.getAssignedVendor().getId() == userToDelete.getId()) {
+                req.setAssignedVendor(null);
+            }
+            if (req.getIntendedVendor() != null && req.getIntendedVendor().getId() == userToDelete.getId()) {
+                req.setIntendedVendor(null);
+            }
+            serviceRequestRepository.save(req);
+        });
+
+        // If the user is a vendor, disassociate their workers
+        if (userToDelete.getRoles().contains("VENDOR")) {
+            List<User> workers = userRepository.findAllById(userToDelete.getWorkers());
+            workers.forEach(worker -> worker.setAssignedVendorId(null));
+            userRepository.saveAll(workers);
+        }
+
+        // 3. Proceed with deletion
+        userRepository.delete(userToDelete);
+        return true;
     }
 
     @Transactional
