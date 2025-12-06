@@ -44,12 +44,10 @@ public class SecurityConfig {
                                 .cors(Customizer.withDefaults()) // Enable CORS
                                 .csrf(AbstractHttpConfigurer::disable) // Disabling CSRF for stateless API
                                 .authorizeHttpRequests(authz -> authz
+                                                // --- PUBLIC ENDPOINTS ---
                                                 // Allow public access to the registration endpoint
                                                 .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
-                                                // Allow public access to download documents; security is implicit via
-                                                // non-guessable IDs
-                                                .requestMatchers(HttpMethod.GET, "/users/{id}/documents/{docType}")
-                                                .permitAll()
+                                                // --- ADMIN-SPECIFIC ROUTES ---
                                                 // Admin-specific routes for user management
                                                 .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN") // More
@@ -77,6 +75,8 @@ public class SecurityConfig {
                                                                                                               // their
                                                                                                               // own
                                                                                                               // data
+                                                .requestMatchers(HttpMethod.GET, "/users/{id}/documents/{docType}")
+                                                .authenticated() // Secure document access
                                                 .requestMatchers(HttpMethod.GET, "/requests/*").authenticated()
                                                 .requestMatchers(HttpMethod.GET, "/requests/my-requests")
                                                 .authenticated()

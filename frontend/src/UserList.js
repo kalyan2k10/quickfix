@@ -24,7 +24,7 @@ const userIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefreshUsers }) => {
+const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefreshUsers, onDownload }) => {
   const [view, setView] = useState('table'); // 'table' or 'map'
 
   useEffect(() => {
@@ -148,13 +148,13 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
                     <button onClick={() => onDeleteUser(user.id)} className="action-button delete-button">Delete</button>
                   </td>
                   <td className="document-links">
-                    {user.photo && <div><a href={`/users/${user.id}/documents/photo`} target="_blank" rel="noopener noreferrer">Photo</a></div>}
-                    {user.panCard && <div><a href={`/users/${user.id}/documents/pancard`} target="_blank" rel="noopener noreferrer">PAN Card</a></div>}
-                    {user.adhaarCard && <div><a href={`/users/${user.id}/documents/adhaarcard`} target="_blank" rel="noopener noreferrer">Aadhaar Card</a></div>}
-                    {user.voterId && <div><a href={`/users/${user.id}/documents/voterid`} target="_blank" rel="noopener noreferrer">Voter ID</a></div>}
-                    {user.digitalSignature && <div><a href={`/users/${user.id}/documents/digitalsignature`} target="_blank" rel="noopener noreferrer">Digital Signature</a></div>}
-                    {user.shopRegistration && <div><a href={`/users/${user.id}/documents/shopregistration`} target="_blank" rel="noopener noreferrer">Shop Registration</a></div>}
-                    {user.userAgreement && <div><a href={`/users/${user.id}/documents/useragreement`} target="_blank" rel="noopener noreferrer">User Agreement</a></div>}
+                    {user.photo && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/photo`, `photo_${user.username}.jpg`); }}>Photo</a></div>}
+                    {user.panCard && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/pancard`, `pancard_${user.username}.pdf`); }}>PAN Card</a></div>}
+                    {user.adhaarCard && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/adhaarcard`, `adhaarcard_${user.username}.pdf`); }}>Aadhaar Card</a></div>}
+                    {user.voterId && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/voterid`, `voterid_${user.username}.pdf`); }}>Voter ID</a></div>}
+                    {user.digitalSignature && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/digitalsignature`, `digitalsignature_${user.username}.pdf`); }}>Digital Signature</a></div>}
+                    {user.shopRegistration && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/shopregistration`, `shopregistration_${user.username}.pdf`); }}>Shop Registration</a></div>}
+                    {user.userAgreement && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/useragreement`, `useragreement_${user.username}.pdf`); }}>User Agreement</a></div>}
                   </td>
                 </tr>
               ))}

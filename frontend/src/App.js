@@ -448,6 +448,34 @@ function App() {
     }
   };
 
+  const handleDownload = (url, filename) => {
+    const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+    // We only need the Authorization header for file downloads
+    const downloadHeaders = { 'Authorization': authHeaders.Authorization };
+
+    fetch(url, { headers: downloadHeaders })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok for file download.');
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(blobUrl);
+        a.remove();
+      })
+      .catch(error => {
+        console.error('Download failed:', error);
+        setError('Sorry, the document could not be downloaded.');
+      });
+  };
+
   const handleLogout = () => {
     setLoggedInUser(null);
     setCredentials({ username: '', password: '' });
@@ -576,6 +604,7 @@ function App() {
               onEditUser={handleEditUser}
               onDeleteUser={handleDeleteUser}
               onRefreshUsers={refreshUsers} // Pass the refresh function here
+              onDownload={handleDownload}
             />
         )}
         {loggedInUser.roles.includes('VENDOR') && 
