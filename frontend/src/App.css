@@ -23,6 +23,17 @@ body, html {
   line-height: 1.6;
 }
 
+/* --- General Link Styling --- */
+a {
+  color: var(--primary-color);
+  text-decoration: none; /* Removing underlines by default */
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
 /* Main Application Container */
 .app-container {
   max-width: 1000px;

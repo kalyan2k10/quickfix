@@ -6,6 +6,7 @@
     --text-light: #e0e0e0;
     --text-muted: #888888;
     --border-color: #333333;
+    --primary-hover: #00b8e6; /* Darker Neon Blue */
 }
 
 /* Styles for the User Dashboard Map View */
@@ -113,4 +114,22 @@
 
 .or-divider span {
     padding: 0 10px;
+}
+
+/* --- Action Button Styles --- */
+.action-button.primary {
+    background-color: var(--primary-color);
+    color: #000; /* Black text for contrast */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button.primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
 }

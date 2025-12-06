@@ -185,10 +185,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
             </div>
           )}
           <div className="request-actions">
-            <button className="complete" onClick={() => {
+            <button className="action-button primary" onClick={() => {
               // The backend now handles all status updates for user and worker.
               onCompleteRequest(activeRequest.id);
-            }}>Mark as Complete & Pay</button>
+            }}>Mark as Complete &amp; Pay</button>
           </div>
         </div>
         <div className="user-list-section">
@@ -253,7 +253,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
           Your request for "<strong>{activeRequest.problemDescription}</strong>" has been marked as complete by{" "}
           <strong>{activeRequest.assignedVendor?.username}</strong>.
         </p>
-        <button onClick={() => setActiveRequest(null)}>Okay</button>
+        <button className="action-button primary" onClick={() => setActiveRequest(null)}>Okay</button>
       </div>
     );
   }
