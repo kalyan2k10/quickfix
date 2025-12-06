@@ -9,7 +9,7 @@ import java.util.List;
 public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, Long> {
     List<ServiceRequest> findByStatus(RequestStatus status);
 
-    List<ServiceRequest> findByStatusAndIntendedVendorId(RequestStatus status, Long vendorId);
+    List<ServiceRequest> findByStatusAndIntendedVendorId(RequestStatus open, Long id);
 
     List<ServiceRequest> findByRequestingUser(User user);
 }

@@ -7,6 +7,7 @@ import com.innovation.repository.ServiceRequestRepository;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -17,24 +18,74 @@ public class ServiceRequestService {
     private final ServiceRequestRepository requestRepository;
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
+    private final UserService userService;
 
+    @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
+            UserService userService,
             UserStatusService userStatusService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
         this.userStatusService = userStatusService;
     }
 
     @Transactional
     public ServiceRequest createRequest(ServiceRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
+        User requestingUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        request.setRequestingUser(user);
+        request.setRequestingUser(requestingUser);
         request.setStatus(RequestStatus.OPEN);
 
+        // --- Find the nearest vendor ---
+        findAndSetNearestVendor(request, requestingUser);
+
         return requestRepository.save(request);
+    }
+
+    private void findAndSetNearestVendor(ServiceRequest request, User requestingUser) {
+        Double userLat = requestingUser.getLatitude();
+        Double userLon = requestingUser.getLongitude();
+
+        if (userLat == null || userLon == null) {
+            // Cannot find nearest vendor without user's location.
+            // The request will be open to all, which is the old behavior.
+            return;
+        }
+
+        // Get vendors who can handle this specific request type
+        List<User> qualifiedVendors = userService.getVendorsByRequestType(request.getProblemDescription());
+
+        User nearestVendor = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (User vendor : qualifiedVendors) {
+            if (vendor.getLatitude() != null && vendor.getLongitude() != null) {
+                double distance = haversine(userLat, userLon, vendor.getLatitude(), vendor.getLongitude());
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestVendor = vendor;
+                }
+            }
+        }
+
+        if (nearestVendor != null) {
+            request.setIntendedVendor(nearestVendor);
+        }
+    }
+
+    // Haversine formula to calculate distance between two lat/lon points in km
+    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371; // Radius of the Earth in km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     public List<ServiceRequest> getOpenRequests() {
@@ -42,7 +93,8 @@ public class ServiceRequestService {
         User vendor = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Vendor not found"));
 
-        return requestRepository.findByStatus(RequestStatus.OPEN);
+        // Return requests that are OPEN and intended for this specific vendor
+        return requestRepository.findByStatusAndIntendedVendorId(RequestStatus.OPEN, vendor.getId());
     }
 
     public List<ServiceRequest> getMyRequests() {
