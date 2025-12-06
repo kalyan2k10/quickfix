@@ -235,9 +235,16 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
     return (
       <div className="form-card">
         <h2>Waiting for Vendor Confirmation</h2>
-        <p>Your request for "<strong>{activeRequest.problemDescription}</strong>" has been sent.</p>
-        <p>We are finding a nearby vendor for you...</p>
+        <p>Your request for "<strong>{activeRequest.problemDescription.replace(/_/g, ' ')}</strong>" has been sent.</p>
         <Spinner />
+        {activeRequest.intendedVendor ? (
+          <p>
+            We have routed your request to the nearest available vendor, <strong>{activeRequest.intendedVendor.name || activeRequest.intendedVendor.username}</strong>.
+            Waiting for them to accept.
+          </p>
+        ) : (
+          <p>We are searching for the best vendor to handle your request...</p>
+        )}
         <p><em>You will be automatically updated once a vendor accepts.</em></p>
       </div>
     );
@@ -327,7 +334,11 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                   zoom={12}
                 >
                   {/* User's Location */}
-                  <Marker position={mapCenter} icon={userIcon} title="You are here" />
+                  {userLocation && (
+                    <Marker 
+                      position={{ lat: userLocation.latitude, lng: userLocation.longitude }} 
+                      icon={userIcon} title="You are here" />
+                  )}
 
                   {/* Nearby Vendor Locations */}
                   {vendorsWithDistances.map(vendor => (
