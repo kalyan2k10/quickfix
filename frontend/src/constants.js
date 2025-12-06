@@ -13,3 +13,5 @@ export const UserActivityStatus = {
   ASSIGNED: 'ASSIGNED',
   COMPLETED: 'COMPLETED',
 };
+
+export const VENDOR_ACCEPT_TIMEOUT_SECONDS = 30;

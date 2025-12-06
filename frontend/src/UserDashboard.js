@@ -334,11 +334,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                   zoom={12}
                 >
                   {/* User's Location */}
-                  {userLocation && (
-                    <Marker 
-                      position={{ lat: userLocation.latitude, lng: userLocation.longitude }} 
-                      icon={userIcon} title="You are here" />
-                  )}
+                  <Marker position={mapCenter} icon={userIcon} title="You are here" />
 
                   {/* Nearby Vendor Locations */}
                   {vendorsWithDistances.map(vendor => (

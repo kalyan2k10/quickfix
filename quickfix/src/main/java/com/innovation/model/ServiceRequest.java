@@ -33,6 +33,8 @@ public class ServiceRequest {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private LocalDateTime lastRoutedAt;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -88,6 +90,14 @@ public class ServiceRequest {
 
     public void setAssignedWorker(User assignedWorker) {
         this.assignedWorker = assignedWorker;
+    }
+
+    public LocalDateTime getLastRoutedAt() {
+        return lastRoutedAt;
+    }
+
+    public void setLastRoutedAt(LocalDateTime lastRoutedAt) {
+        this.lastRoutedAt = lastRoutedAt;
     }
 
     // Other getters and setters...

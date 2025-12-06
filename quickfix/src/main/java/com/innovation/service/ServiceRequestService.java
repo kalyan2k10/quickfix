@@ -6,9 +6,12 @@ import com.innovation.model.User;
 import com.innovation.repository.ServiceRequestRepository;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,8 @@ public class ServiceRequestService {
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
     private final UserService userService;
+
+    private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 30;
 
     @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
@@ -73,6 +78,7 @@ public class ServiceRequestService {
 
         if (nearestVendor != null) {
             request.setIntendedVendor(nearestVendor);
+            request.setLastRoutedAt(LocalDateTime.now());
         }
     }
 
@@ -106,7 +112,45 @@ public class ServiceRequestService {
     }
 
     public Optional<ServiceRequest> getRequestById(Long id) {
-        return requestRepository.findById(id);
+        Optional<ServiceRequest> requestOpt = requestRepository.findById(id);
+
+        if (requestOpt.isPresent()) {
+            ServiceRequest request = requestOpt.get();
+            // Check for timeout only for the user who requested it
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username = ((UserDetails) principal).getUsername();
+
+            if (request.getStatus() == RequestStatus.OPEN &&
+                    request.getIntendedVendor() != null &&
+                    request.getRequestingUser().getUsername().equals(username) &&
+                    request.getLastRoutedAt() != null &&
+                    request.getLastRoutedAt().plusSeconds(VENDOR_ACCEPT_TIMEOUT_SECONDS)
+                            .isBefore(LocalDateTime.now())) {
+                return Optional.of(rerouteRequest(request));
+            }
+        }
+
+        return requestOpt;
+    }
+
+    @Transactional
+    public ServiceRequest rerouteRequest(ServiceRequest request) {
+        User currentIntendedVendor = request.getIntendedVendor();
+        List<User> qualifiedVendors = userService.getVendorsByRequestType(request.getProblemDescription());
+
+        // Find the next closest vendor who is not the current one
+        User nextNearestVendor = qualifiedVendors.stream()
+                .filter(v -> v.getId() != currentIntendedVendor.getId())
+                .min((v1, v2) -> Double.compare(
+                        haversine(request.getRequestingUser().getLatitude(), request.getRequestingUser().getLongitude(),
+                                v1.getLatitude(), v1.getLongitude()),
+                        haversine(request.getRequestingUser().getLatitude(), request.getRequestingUser().getLongitude(),
+                                v2.getLatitude(), v2.getLongitude())))
+                .orElse(null);
+
+        request.setIntendedVendor(nextNearestVendor); // This could be null if no other vendors are found
+        request.setLastRoutedAt(LocalDateTime.now());
+        return requestRepository.save(request);
     }
 
     public Optional<ServiceRequest> updateRequestStatus(Long requestId, String status) {
