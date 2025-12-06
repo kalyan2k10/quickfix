@@ -581,6 +581,7 @@ function App() {
         {loggedInUser.roles.includes('VENDOR') && 
             <VendorDashboard 
               requests={serviceRequests} 
+              loggedInUser={loggedInUser}
               workers={vendorWorkers} 
               onAssignWorker={handleAssignWorkerToRequest} 
               onRefreshRequests={refreshServiceRequests} // Pass the refresh function

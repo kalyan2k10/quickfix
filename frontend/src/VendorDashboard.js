@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 
-const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests }) => {
+const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests, loggedInUser }) => {
   const [selectedWorkers, setSelectedWorkers] = useState({}); // State to hold { requestId: workerId }
 
   useEffect(() => {
@@ -46,7 +46,11 @@ const VendorDashboard = ({ requests, workers, onAssignWorker, onRefreshRequests 
     });
   };
 
-  const openRequests = requests.filter(req => req.status === 'OPEN');
+  // Filter for requests that are OPEN and intended for the currently logged-in vendor.
+  const openRequests = requests.filter(req => 
+    req.status === 'OPEN' && 
+    req.intendedVendor?.id === loggedInUser.id
+  );
 
   return (
     <div className="vendor-dashboard">
