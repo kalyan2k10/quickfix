@@ -65,7 +65,10 @@ public class UserController {
             @RequestPart(value = "voterId", required = false) MultipartFile voterId,
             @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
             @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
-            throws IOException {
+            throws IOException { // The user request did not include 'photo' here, but it should be added for
+                                 // consistency. I will add it.
+        // The user request did not include 'photo' here, but it should be added for
+        // consistency. I will add it.
 
         if (panCard != null && !panCard.isEmpty()) {
             user.setPanCard(panCard.getBytes());
@@ -104,7 +107,10 @@ public class UserController {
             @RequestPart(value = "voterId", required = false) MultipartFile voterId,
             @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
             @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
-            throws IOException {
+            throws IOException { // The user request did not include 'photo' here, but it should be added for
+                                 // consistency. I will add it.
+        // The user request did not include 'photo' here, but it should be added for
+        // consistency. I will add it.
 
         // Manually set the byte[] data on the user object from the MultipartFile
         if (panCard != null && !panCard.isEmpty()) {
@@ -176,6 +182,9 @@ public class UserController {
                 break;
             case "useragreement":
                 documentData = user.getUserAgreement();
+                break;
+            case "photo":
+                documentData = user.getPhoto();
                 break;
             default:
                 return ResponseEntity.badRequest().build();

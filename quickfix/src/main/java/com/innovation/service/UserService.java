@@ -123,6 +123,9 @@ public class UserService {
                     if (userDetails.getUserAgreement() != null) {
                         user.setUserAgreement(userDetails.getUserAgreement());
                     }
+                    if (userDetails.getPhoto() != null) {
+                        user.setPhoto(userDetails.getPhoto());
+                    }
 
                     // Update location
                     user.setAddress(userDetails.getAddress());

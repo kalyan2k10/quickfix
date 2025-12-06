@@ -52,10 +52,12 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // Admin-specific routes for user management
                                                 .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
-                                                .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN")
-                                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/users/{id}").hasAuthority("ADMIN") // More
+                                                                                                                      // specific
+                                                .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasAuthority("ADMIN") // More
+                                                                                                                         // specific
                                                 // Vendor-specific routes
-                                                .requestMatchers(HttpMethod.POST, "/requests/*/accept")
+                                                .requestMatchers(HttpMethod.POST, "/requests/{id}/accept")
                                                 .hasAuthority("VENDOR")
                                                 .requestMatchers(HttpMethod.POST, "/requests/*/deny")
                                                 .hasAuthority("VENDOR")

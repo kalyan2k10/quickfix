@@ -49,6 +49,10 @@ public class User {
     @Column(columnDefinition = "MEDIUMBLOB")
     private byte[] userAgreement;
 
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
+    private byte[] photo;
+
     public User() {
     }
 
@@ -212,6 +216,14 @@ public class User {
         this.userAgreement = userAgreement;
     }
 
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
     public Set<Long> getWorkers() {
         return workers;
     }
@@ -264,13 +276,19 @@ public class User {
     @JsonProperty("hasDocuments")
     public boolean hasAnyDocument() {
         return hasPanCard() || hasAdhaarCard() || hasDigitalSignature() || hasVoterId() || hasShopRegistration()
-                || hasUserAgreement();
+                || hasUserAgreement() || hasPhoto();
     }
 
     @JsonProperty("userAgreement")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Boolean hasUserAgreement() {
         return this.userAgreement != null && this.userAgreement.length > 0;
+    }
+
+    @JsonProperty("photo")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Boolean hasPhoto() {
+        return this.photo != null && this.photo.length > 0;
     }
 
 }

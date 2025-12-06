@@ -91,9 +91,13 @@ const AdminDashboard = ({
         </div>
 
         <form onSubmit={onUserSubmit}>
+           <label htmlFor="username">Username</label>
           <input className="form-input" type="text" name="username" placeholder="Username" value={newUser.username} onChange={onInputChange} required />
+           <label htmlFor="password">Password</label>
           <input className="form-input" type="password" name="password" placeholder={editingUser ? "New Password (optional)" : "Password"} value={newUser.password} onChange={onInputChange} required={!editingUser} />
+            <label htmlFor="email">Email</label>
           <input className="form-input" type="email" name="email" placeholder="Email" value={newUser.email} onChange={onInputChange} required />
+           <label htmlFor="role">Role</label>
           <select className="form-input" name="role" value={newUser.role} onChange={onInputChange}>
             <option value="USER">User</option>
             <option value="VENDOR">Vendor</option>
@@ -138,6 +142,7 @@ const AdminDashboard = ({
           {(newUser.role === 'VENDOR' || newUser.role === 'WORKER') && (
             <>
               <h3 className="form-section-header">Vendor KYC Details</h3>
+              <label htmlFor="digitalSignature">Full Name or Shop Name</label>
               <input className="form-input" type="text" name="name" placeholder="Full Name or Shop Name" value={newUser.name || ''} onChange={onInputChange} required />
 
               <label htmlFor="digitalSignature">Digital Signature</label>
@@ -157,6 +162,9 @@ const AdminDashboard = ({
 
               <label htmlFor="userAgreement">User Agreement</label>
               <input className="form-input" type="file" name="userAgreement" id="userAgreement" onChange={onFileChange} />
+
+              <label htmlFor="photo">User Photo</label>
+              <input className="form-input" type="file" name="photo" id="photo" onChange={onFileChange} />
             </>
           )}
           

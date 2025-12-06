@@ -59,7 +59,7 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
     }
   };
 
-  return (
+ return (
     <div className="user-list-container">
       <div className="user-list-header">
         <h2>Manage Users</h2>
@@ -97,6 +97,7 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
                 <th>Assigned Workers</th>
                 <th>Service Types</th>
                 <th>Actions</th>
+                <th>Uploaded Documents</th>
               </tr>
             </thead>
             <tbody>
@@ -145,6 +146,15 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
                   <td className="user-actions">
                     <button onClick={() => onEditUser(user)} className="action-button edit-button">Edit</button>
                     <button onClick={() => onDeleteUser(user.id)} className="action-button delete-button">Delete</button>
+                  </td>
+                  <td className="document-links">
+                    {user.photo && <div><a href={`/users/${user.id}/documents/photo`} target="_blank" rel="noopener noreferrer">Photo</a></div>}
+                    {user.panCard && <div><a href={`/users/${user.id}/documents/pancard`} target="_blank" rel="noopener noreferrer">PAN Card</a></div>}
+                    {user.adhaarCard && <div><a href={`/users/${user.id}/documents/adhaarcard`} target="_blank" rel="noopener noreferrer">Aadhaar Card</a></div>}
+                    {user.voterId && <div><a href={`/users/${user.id}/documents/voterid`} target="_blank" rel="noopener noreferrer">Voter ID</a></div>}
+                    {user.digitalSignature && <div><a href={`/users/${user.id}/documents/digitalsignature`} target="_blank" rel="noopener noreferrer">Digital Signature</a></div>}
+                    {user.shopRegistration && <div><a href={`/users/${user.id}/documents/shopregistration`} target="_blank" rel="noopener noreferrer">Shop Registration</a></div>}
+                    {user.userAgreement && <div><a href={`/users/${user.id}/documents/useragreement`} target="_blank" rel="noopener noreferrer">User Agreement</a></div>}
                   </td>
                 </tr>
               ))}
