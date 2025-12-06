@@ -148,7 +148,7 @@ const UserList = ({ users, onShowCreateUser, onEditUser, onDeleteUser, onRefresh
                     <button onClick={() => onDeleteUser(user.id)} className="action-button delete-button">Delete</button>
                   </td>
                   <td className="document-links">
-                    {user.photo && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/photo`, `photo_${user.username}.jpg`); }}>Photo</a></div>}
+                    {user.hasPhoto && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/photo`, `photo_${user.username}.jpg`); }}>Photo</a></div>}
                     {user.panCard && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/pancard`, `pancard_${user.username}.pdf`); }}>PAN Card</a></div>}
                     {user.adhaarCard && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/adhaarcard`, `adhaarcard_${user.username}.pdf`); }}>Aadhaar Card</a></div>}
                     {user.voterId && <div><a href="#" onClick={(e) => { e.preventDefault(); onDownload(`/users/${user.id}/documents/voterid`, `voterid_${user.username}.pdf`); }}>Voter ID</a></div>}

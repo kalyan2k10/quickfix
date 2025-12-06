@@ -139,7 +139,7 @@ const AdminDashboard = ({
             </>
           )}
 
-          {(newUser.role === 'VENDOR' || newUser.role === 'WORKER') && (
+          {(newUser.role === 'USER' || newUser.role === 'VENDOR' || newUser.role === 'WORKER') && (
             <>
               <h3 className="form-section-header">Vendor KYC Details</h3>
               <label htmlFor="digitalSignature">Full Name or Shop Name</label>

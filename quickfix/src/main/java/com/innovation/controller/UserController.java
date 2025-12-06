@@ -64,7 +64,8 @@ public class UserController {
             @RequestPart(value = "adhaarCard", required = false) MultipartFile adhaarCard,
             @RequestPart(value = "voterId", required = false) MultipartFile voterId,
             @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
-            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
+            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement,
+            @RequestPart(value = "photo", required = false) MultipartFile photo)
             throws IOException { // The user request did not include 'photo' here, but it should be added for
                                  // consistency. I will add it.
         // The user request did not include 'photo' here, but it should be added for
@@ -88,6 +89,9 @@ public class UserController {
         if (userAgreement != null && !userAgreement.isEmpty()) {
             user.setUserAgreement(userAgreement.getBytes());
         }
+        if (photo != null && !photo.isEmpty()) {
+            user.setPhoto(photo.getBytes());
+        }
         return userService.addUser(user);
     }
 
@@ -106,7 +110,8 @@ public class UserController {
             @RequestPart(value = "adhaarCard", required = false) MultipartFile adhaarCard,
             @RequestPart(value = "voterId", required = false) MultipartFile voterId,
             @RequestPart(value = "shopRegistration", required = false) MultipartFile shopRegistration,
-            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement)
+            @RequestPart(value = "userAgreement", required = false) MultipartFile userAgreement,
+            @RequestPart(value = "photo", required = false) MultipartFile photo)
             throws IOException { // The user request did not include 'photo' here, but it should be added for
                                  // consistency. I will add it.
         // The user request did not include 'photo' here, but it should be added for
@@ -130,6 +135,9 @@ public class UserController {
         }
         if (userAgreement != null && !userAgreement.isEmpty()) {
             user.setUserAgreement(userAgreement.getBytes());
+        }
+        if (photo != null && !photo.isEmpty()) {
+            user.setPhoto(photo.getBytes());
         }
 
         return userService.updateUser(id, user)
@@ -185,6 +193,7 @@ public class UserController {
                 break;
             case "photo":
                 documentData = user.getPhoto();
+                filename = "photo.jpg"; // Set correct filename for photo
                 break;
             default:
                 return ResponseEntity.badRequest().build();
@@ -194,7 +203,14 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF)
+        MediaType contentType = MediaType.APPLICATION_PDF;
+        if (docType.equalsIgnoreCase("photo")) {
+            // Assuming photos are JPEGs. You could make this more robust
+            // by storing the content type in the database.
+            contentType = MediaType.IMAGE_JPEG;
+        }
+
+        return ResponseEntity.ok().contentType(contentType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(documentData);
     }

@@ -276,7 +276,7 @@ public class User {
     @JsonProperty("hasDocuments")
     public boolean hasAnyDocument() {
         return hasPanCard() || hasAdhaarCard() || hasDigitalSignature() || hasVoterId() || hasShopRegistration()
-                || hasUserAgreement() || hasPhoto();
+                || hasUserAgreement() || isHasPhoto();
     }
 
     @JsonProperty("userAgreement")
@@ -285,9 +285,9 @@ public class User {
         return this.userAgreement != null && this.userAgreement.length > 0;
     }
 
-    @JsonProperty("photo")
+    @JsonProperty("hasPhoto")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public Boolean hasPhoto() {
+    public Boolean isHasPhoto() {
         return this.photo != null && this.photo.length > 0;
     }
 
