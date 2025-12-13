@@ -234,8 +234,15 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
   if (activeRequest && activeRequest.status === 'OPEN') {
     return (
       <div className="form-card">
-        <h2>Awaiting Vendor Acceptance</h2>
-        <p>Your request for "<strong>{activeRequest.problemDescription.replace(/_/g, ' ')}</strong>" has been sent.</p>
+        <div className="awaiting-header">
+          <h2>
+            Awaiting Vendor Acceptance
+          {activeRequest.estimatedVehicleAge && (
+              <span style={{ fontWeight: 'normal' }}> (est. age: {activeRequest.estimatedVehicleAge})</span>
+          )}
+          </h2>
+        </div>
+        <p>Your request for "<strong>{activeRequest.problemDescription.replace(/_/g, ' ')}</strong>" for vehicle <strong>{activeRequest.vehicleNumber}</strong> has been sent.</p>
         <Spinner />
         {activeRequest.intendedVendor ? (
           <div className="vendor-info-waiting">

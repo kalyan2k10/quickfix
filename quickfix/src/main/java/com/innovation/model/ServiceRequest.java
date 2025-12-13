@@ -1,5 +1,6 @@
 package com.innovation.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -11,6 +12,8 @@ public class ServiceRequest {
     private Long id;
 
     private String problemDescription;
+
+    private String vehicleNumber;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
@@ -35,6 +38,10 @@ public class ServiceRequest {
 
     private LocalDateTime lastRoutedAt;
 
+    @Transient // This field is not persisted in the database
+    @JsonProperty("estimatedVehicleAge")
+    private String estimatedVehicleAge;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -50,6 +57,14 @@ public class ServiceRequest {
 
     public void setProblemDescription(String problemDescription) {
         this.problemDescription = problemDescription;
+    }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    public void setVehicleNumber(String vehicleNumber) {
+        this.vehicleNumber = vehicleNumber;
     }
 
     public RequestStatus getStatus() {
@@ -100,5 +115,12 @@ public class ServiceRequest {
         this.lastRoutedAt = lastRoutedAt;
     }
 
+    public String getEstimatedVehicleAge() {
+        return estimatedVehicleAge;
+    }
+
+    public void setEstimatedVehicleAge(String estimatedVehicleAge) {
+        this.estimatedVehicleAge = estimatedVehicleAge;
+    }
     // Other getters and setters...
 }

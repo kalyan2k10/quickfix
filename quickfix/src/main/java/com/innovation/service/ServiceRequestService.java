@@ -22,17 +22,20 @@ public class ServiceRequestService {
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
     private final UserService userService;
+    private final VehicleEstimationService vehicleEstimationService;
 
     private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 60;
 
     @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
             UserService userService,
-            UserStatusService userStatusService) {
+            UserStatusService userStatusService,
+            VehicleEstimationService vehicleEstimationService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.userStatusService = userStatusService;
+        this.vehicleEstimationService = vehicleEstimationService;
     }
 
     @Transactional
@@ -47,7 +50,11 @@ public class ServiceRequestService {
         // --- Find the nearest vendor ---
         findAndSetNearestVendor(request, requestingUser);
 
-        return requestRepository.save(request);
+        ServiceRequest savedRequest = requestRepository.save(request);
+        // Set the transient vehicle age property after saving
+        savedRequest
+                .setEstimatedVehicleAge(vehicleEstimationService.estimateVehicleAge(savedRequest.getVehicleNumber()));
+        return savedRequest;
     }
 
     private void findAndSetNearestVendor(ServiceRequest request, User requestingUser) {
@@ -114,6 +121,9 @@ public class ServiceRequestService {
     public Optional<ServiceRequest> getRequestById(Long id) {
         Optional<ServiceRequest> requestOpt = requestRepository.findById(id);
 
+        // Set the transient vehicle age property on fetch
+        requestOpt.ifPresent(this::setVehicleAge);
+
         if (requestOpt.isPresent()) {
             ServiceRequest request = requestOpt.get();
             // Check for timeout only for the user who requested it
@@ -133,6 +143,11 @@ public class ServiceRequestService {
         return requestOpt;
     }
 
+    private void setVehicleAge(ServiceRequest request) {
+        String estimatedAge = vehicleEstimationService.estimateVehicleAge(request.getVehicleNumber());
+        request.setEstimatedVehicleAge(estimatedAge);
+    }
+
     @Transactional
     public ServiceRequest rerouteRequest(ServiceRequest request) {
         User currentIntendedVendor = request.getIntendedVendor();
@@ -150,7 +165,9 @@ public class ServiceRequestService {
 
         request.setIntendedVendor(nextNearestVendor); // This could be null if no other vendors are found
         request.setLastRoutedAt(LocalDateTime.now());
-        return requestRepository.save(request);
+        ServiceRequest reroutedRequest = requestRepository.save(request);
+        setVehicleAge(reroutedRequest);
+        return reroutedRequest;
     }
 
     public Optional<ServiceRequest> updateRequestStatus(Long requestId, String status) {
@@ -177,7 +194,9 @@ public class ServiceRequestService {
                         default:
                             throw new IllegalArgumentException("Invalid status: " + status);
                     }
-                    return requestRepository.save(request);
+                    ServiceRequest updatedRequest = requestRepository.save(request);
+                    setVehicleAge(updatedRequest);
+                    return updatedRequest;
                 });
     }
 
@@ -201,7 +220,9 @@ public class ServiceRequestService {
                     // --- Update User and Worker Statuses to COMPLETED ---
                     userStatusService.transitionToCompleted(request.getRequestingUser(), request.getAssignedWorker());
 
-                    return requestRepository.save(request);
+                    ServiceRequest completedRequest = requestRepository.save(request);
+                    setVehicleAge(completedRequest);
+                    return completedRequest;
                 });
     }
 
@@ -241,7 +262,9 @@ public class ServiceRequestService {
                     // --- Update User and Worker Statuses ---
                     userStatusService.transitionToAssigned(request.getRequestingUser(), worker);
 
-                    return requestRepository.save(request);
+                    ServiceRequest assignedRequest = requestRepository.save(request);
+                    setVehicleAge(assignedRequest);
+                    return assignedRequest;
                 });
     }
 }
