@@ -301,17 +301,17 @@ function App() {
     if (problem === 'Other' && newRequest.otherProblem) {
       problem = newRequest.otherProblem;
     }
-    // As per your request, we will now send the request type in a 'requestTypes' array
-    // to be consistent with the rest of the application's logic.
     const requestData = {
-      ...newRequest,
-      requestTypes: [problem] // The backend should read this and set problemDescription
+      problemDescription: problem,
+      vehicleNumber: newRequest.vehicleNumber,
+      // The backend will get the user from the security context,
+      // so we don't need to send name, email, etc.
     };
 
     fetch(`/requests`, {
       method: 'POST',
       headers: authHeaders,
-      body: JSON.stringify(requestData),
+      body: JSON.stringify(requestData), // Send the corrected data object
     })
     .then(res => {
         if (!res.ok) throw new Error('Failed to submit request.');
