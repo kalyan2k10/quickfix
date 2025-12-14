@@ -38,6 +38,7 @@ function App() {
   const [vendorsWithDistances, setVendorsWithDistances] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
+  const [requestFile, setRequestFile] = useState(null);
   // Use the hook to safely load the map. Since the script is in index.html,
   // we just need to specify the libraries.
   const { isLoaded, loadError } = useJsApiLoader({
@@ -158,6 +159,13 @@ function App() {
     const { name, files } = event.target;
     if (files.length > 0) {
       setNewUserFiles(prev => ({ ...prev, [name]: files[0] }));
+    }
+  };
+
+  const handleRequestFileChange = (event) => {
+    const { name, files } = event.target;
+    if (files.length > 0) {
+      setRequestFile(files[0]);
     }
   };
 
@@ -297,21 +305,28 @@ function App() {
 
   const handleRequestSubmit = () => {
     const authHeaders = createAuthHeaders(loggedInUser.username, credentials.password);
+    const multiPartAuthHeaders = { 'Authorization': authHeaders.Authorization };
+
     let problem = newRequest.problemDescription;
     if (problem === 'Other' && newRequest.otherProblem) {
       problem = newRequest.otherProblem;
     }
-    const requestData = {
+
+    const formData = new FormData();
+    const requestBlob = new Blob([JSON.stringify({
       problemDescription: problem,
       vehicleNumber: newRequest.vehicleNumber,
-      // The backend will get the user from the security context,
-      // so we don't need to send name, email, etc.
-    };
+    })], { type: 'application/json' });
+    formData.append('request', requestBlob);
+
+    if (requestFile) {
+      formData.append('image', requestFile);
+    }
 
     fetch(`/requests`, {
       method: 'POST',
-      headers: authHeaders,
-      body: JSON.stringify(requestData), // Send the corrected data object
+      headers: multiPartAuthHeaders,
+      body: formData,
     })
     .then(res => {
         if (!res.ok) throw new Error('Failed to submit request.');
@@ -320,6 +335,7 @@ function App() {
     .then(createdRequest => {
         setActiveRequest(createdRequest); // Start tracking the request
         setNewRequest({ problemDescription: '', vehicleNumber: '', name: loggedInUser.username, email: loggedInUser.email, phoneNumber: '', otherProblem: '' });
+        setRequestFile(null); // Clear the file after submission
     })
     .catch(handleApiError);
   };
@@ -622,7 +638,7 @@ function App() {
           <UserHomepage onSelectService={handleSelectService} />
         )}
         {loggedInUser.roles.includes('USER') && userView === 'dashboard' && (
-          <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} nearestVendor={nearestVendor} fare={fare} distance={distance} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} onBackToHome={() => setUserView('homepage')} />
+          <UserDashboard newRequest={newRequest} onInputChange={handleUserDashboardInputChange} onRequestSubmit={handleRequestSubmit} vendorsWithDistances={vendorsWithDistances} userLocation={userLocation} activeRequest={activeRequest} setActiveRequest={setActiveRequest} authHeaders={createAuthHeaders(loggedInUser.username, credentials.password)} onCompleteRequest={handleUserCompletesRequest} isLoaded={isLoaded} loadError={loadError} onBackToHome={() => setUserView('homepage')} onFileChange={handleRequestFileChange} />
         )}
       </main>
     </div>

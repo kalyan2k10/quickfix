@@ -6,6 +6,7 @@ import com.innovation.model.User;
 import com.innovation.repository.ServiceRequestRepository;
 import com.innovation.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +24,30 @@ public class ServiceRequestService {
     private final UserStatusService userStatusService;
     private final UserService userService;
     private final VehicleEstimationService vehicleEstimationService;
+    private final VehicleTypeAnalysisService vehicleTypeAnalysisService;
 
     private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 60;
 
     @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
             UserService userService,
-            UserStatusService userStatusService,
-            VehicleEstimationService vehicleEstimationService) {
+            UserStatusService userStatusService, VehicleEstimationService vehicleEstimationService,
+            VehicleTypeAnalysisService vehicleTypeAnalysisService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.userStatusService = userStatusService;
         this.vehicleEstimationService = vehicleEstimationService;
+        this.vehicleTypeAnalysisService = vehicleTypeAnalysisService;
     }
 
     @Transactional
-    public ServiceRequest createRequest(ServiceRequest request) {
+    public ServiceRequest createRequest(ServiceRequest request, MultipartFile image) {
+        if (image != null && !image.isEmpty()) {
+            String vehicleType = vehicleTypeAnalysisService.determineVehicleType(image);
+            // Here you could override or set the vehicle type if it's part of your model.
+            // For now, we are not storing it, but the analysis is performed.
+        }
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User requestingUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

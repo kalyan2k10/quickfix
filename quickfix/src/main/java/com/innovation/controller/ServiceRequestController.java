@@ -2,9 +2,11 @@ package com.innovation.controller;
 
 import com.innovation.model.ServiceRequest;
 import com.innovation.service.ServiceRequestService;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,10 +20,12 @@ public class ServiceRequestController {
         this.requestService = requestService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
-    public ServiceRequest createRequest(@RequestBody ServiceRequest request) {
-        return requestService.createRequest(request);
+    public ServiceRequest createRequest(
+            @RequestPart("request") ServiceRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return requestService.createRequest(request, image);
     }
 
     @GetMapping

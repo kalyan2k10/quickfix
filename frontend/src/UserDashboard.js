@@ -6,7 +6,7 @@ import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api'; 
 // A simple component for a loading spinner
 const Spinner = () => <div className="spinner"></div>;
 
-const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, onCompleteRequest, isLoaded, loadError }) => {
+const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWithDistances, userLocation, activeRequest, setActiveRequest, authHeaders, onCompleteRequest, isLoaded, loadError, onFileChange }) => {
   const [liveVendorLocation, setLiveVendorLocation] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
   const [directions, setDirections] = useState(null);
@@ -314,6 +314,10 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                 placeholder="Your Phone Number"
                 value={newRequest.phoneNumber} onChange={onInputChange} required />
             
+            <label htmlFor="vehicleImage" className="form-label optional">Vehicle Image (Optional)</label>
+            <input className="form-input" type="file" name="vehicleImage" id="vehicleImage" accept="image/*"
+                onChange={onFileChange} />
+
             {newRequest.problemDescription === 'Other' && (
               <input className="form-input" type="text" name="otherProblem" placeholder="Please describe the issue" value={newRequest.otherProblem} onChange={onInputChange} required />
             )}
