@@ -15,6 +15,8 @@ public class ServiceRequest {
 
     private String vehicleNumber;
 
+    private String vehicleType;
+
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
@@ -65,6 +67,14 @@ public class ServiceRequest {
 
     public void setVehicleNumber(String vehicleNumber) {
         this.vehicleNumber = vehicleNumber;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public RequestStatus getStatus() {

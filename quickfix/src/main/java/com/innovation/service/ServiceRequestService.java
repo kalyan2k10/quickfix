@@ -45,8 +45,7 @@ public class ServiceRequestService {
     public ServiceRequest createRequest(ServiceRequest request, MultipartFile image) {
         if (image != null && !image.isEmpty()) {
             String vehicleType = vehicleTypeAnalysisService.determineVehicleType(image);
-            // Here you could override or set the vehicle type if it's part of your model.
-            // For now, we are not storing it, but the analysis is performed.
+            request.setVehicleType(vehicleType);
         }
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User requestingUser = userRepository.findByUsername(username)

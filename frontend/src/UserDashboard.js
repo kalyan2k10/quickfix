@@ -237,8 +237,14 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         <div className="awaiting-header">
           <h2>
             Awaiting Vendor Acceptance
-          {activeRequest.estimatedVehicleAge && (
-              <span style={{ fontWeight: 'normal' }}> (est. age: {activeRequest.estimatedVehicleAge})</span>
+          {(activeRequest.estimatedVehicleAge || activeRequest.vehicleType) && (
+              <span style={{ fontWeight: 'normal' }}>
+                {' ('}
+                {activeRequest.estimatedVehicleAge && `est. age: ${activeRequest.estimatedVehicleAge}`}
+                {activeRequest.estimatedVehicleAge && activeRequest.vehicleType && ', '}
+                {activeRequest.vehicleType && `type: ${activeRequest.vehicleType.replace(/_/g, ' ')}`}
+                {')'}
+              </span>
           )}
           </h2>
         </div>
