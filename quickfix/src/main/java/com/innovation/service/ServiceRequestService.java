@@ -24,27 +24,24 @@ public class ServiceRequestService {
     private final UserStatusService userStatusService;
     private final UserService userService;
     private final VehicleEstimationService vehicleEstimationService;
-    private final VehicleTypeAnalysisService vehicleTypeAnalysisService;
 
     private static final int VENDOR_ACCEPT_TIMEOUT_SECONDS = 60;
 
     @Autowired
     public ServiceRequestService(ServiceRequestRepository requestRepository, UserRepository userRepository,
             UserService userService,
-            UserStatusService userStatusService, VehicleEstimationService vehicleEstimationService,
-            VehicleTypeAnalysisService vehicleTypeAnalysisService) {
+            UserStatusService userStatusService, VehicleEstimationService vehicleEstimationService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.userStatusService = userStatusService;
         this.vehicleEstimationService = vehicleEstimationService;
-        this.vehicleTypeAnalysisService = vehicleTypeAnalysisService;
     }
 
     @Transactional
     public ServiceRequest createRequest(ServiceRequest request, MultipartFile image) {
         if (image != null && !image.isEmpty()) {
-            String vehicleType = vehicleTypeAnalysisService.determineVehicleType(image);
+            String vehicleType = vehicleEstimationService.determineVehicleType(image);
             request.setVehicleType(vehicleType);
         }
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

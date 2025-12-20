@@ -4,11 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
+
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,8 @@ public class VehicleEstimationService {
     private static final Map<String, String> vehicleAgeCache = new ConcurrentHashMap<>();
     private final WebClient webClient;
     private final String apiKey;
-    private static final String GEMINI_MODEL = "gemini-pro-latest"; // Using a model confirmed to be available
+    private static final String GEMINI_TEXT_MODEL = "gemini-pro-latest";
+    private static final String GEMINI_VISION_MODEL = "gemini-flash-latest";
 
     public VehicleEstimationService(WebClient.Builder webClientBuilder,
             @Value("${gemini.api.key}") String apiKey) {
@@ -39,7 +43,10 @@ public class VehicleEstimationService {
     private record Content(List<Part> parts) {
     }
 
-    private record Part(String text) {
+    private record Part(String text, InlineData inline_data) {
+    }
+
+    private record InlineData(String mime_type, String data) {
     }
 
     private record GeminiResponse(List<Candidate> candidates) {
@@ -112,14 +119,14 @@ public class VehicleEstimationService {
                         "If the age cannot be determined from the number, just return 'unknown'.",
                 vehicleNumber);
 
-        GeminiRequest request = new GeminiRequest(List.of(new Content(List.of(new Part(prompt)))));
+        GeminiRequest request = new GeminiRequest(List.of(new Content(List.of(new Part(prompt, null)))));
 
         try {
             Mono<GeminiResponse> responseMono = this.webClient.post() // Use the base webClient
                     .uri(uriBuilder -> uriBuilder
                             .path("/v1beta/models/{model}:generateContent")
                             .queryParam("key", this.apiKey)
-                            .build(GEMINI_MODEL))
+                            .build(GEMINI_TEXT_MODEL))
                     .bodyValue(request)
                     .retrieve()
                     .bodyToMono(GeminiResponse.class);
@@ -141,6 +148,63 @@ public class VehicleEstimationService {
             logger.error("Failed to call Gemini API for vehicle number: {}. Error: {}",
                     vehicleNumber, e.getMessage());
             return null; // Return null on any error (e.g., timeout, network issue, 4xx/5xx)
+        }
+    }
+
+    public String determineVehicleType(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+            String mimeType = imageFile.getContentType();
+
+            String promptText = "Analyze this image. 1. Identify if it is a 'TWO_WHEELER' or 'FOUR_WHEELER'. 2. Extract the vehicle license plate number. Respond strictly in this format: 'Type: <TYPE>, Number: <NUMBER>'. If the number is not visible, use 'UNKNOWN'.";
+
+            Part textPart = new Part(promptText, null);
+            Part imagePart = new Part(null, new InlineData(mimeType, base64Image));
+
+            GeminiRequest request = new GeminiRequest(List.of(new Content(List.of(textPart, imagePart))));
+
+            Mono<GeminiResponse> responseMono = this.webClient.post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v1beta/models/{model}:generateContent")
+                            .queryParam("key", this.apiKey)
+                            .build(GEMINI_VISION_MODEL))
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(GeminiResponse.class);
+
+            GeminiResponse response = responseMono.block();
+
+            String responseText = response.candidates().get(0).content().parts().get(0).text().trim();
+
+            String vehicleType = "UNKNOWN";
+            String vehicleNumber = "UNKNOWN";
+
+            // Parse the response expecting "Type: ..., Number: ..."
+            String[] parts = responseText.split("[,\\n]+");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (trimmed.startsWith("Type:")) {
+                    vehicleType = trimmed.substring(5).trim();
+                } else if (trimmed.startsWith("Number:")) {
+                    vehicleNumber = trimmed.substring(7).trim();
+                }
+            }
+
+            // Fallback if parsing failed but keywords are present
+            if ("UNKNOWN".equals(vehicleType) && responseText.contains("TWO_WHEELER"))
+                vehicleType = "TWO_WHEELER";
+            if ("UNKNOWN".equals(vehicleType) && responseText.contains("FOUR_WHEELER"))
+                vehicleType = "FOUR_WHEELER";
+
+            logger.info("Gemini determined - Type: {}, Number: {}", vehicleType, vehicleNumber);
+            return vehicleType;
+        } catch (Exception e) {
+            logger.error("Failed to call Gemini Vision API for vehicle type analysis.", e);
+            return null;
         }
     }
 }
