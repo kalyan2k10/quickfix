@@ -104,7 +104,7 @@ public class VehicleEstimationService {
 
         // 1. Analyze image if provided
         if (imageFile != null && !imageFile.isEmpty()) {
-            VehicleAnalysisResult analysisResult = determineVehicleType(imageFile);
+            VehicleAnalysisResult analysisResult = determineVehicleNature(imageFile);
             if (analysisResult != null) {
                 vehicleType = analysisResult.vehicleType();
                 // If user didn't provide a number, use the one from the image
@@ -172,7 +172,7 @@ public class VehicleEstimationService {
         }
     }
 
-    private VehicleAnalysisResult determineVehicleType(MultipartFile imageFile) {
+    private VehicleAnalysisResult determineVehicleNature(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             return null;
         }
@@ -181,7 +181,14 @@ public class VehicleEstimationService {
             String base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
             String mimeType = imageFile.getContentType();
 
-            String promptText = "Analyze this image. 1. Identify if it is a 'TWO_WHEELER' or 'FOUR_WHEELER'. 2. Extract the vehicle license plate number. Respond strictly in this format: 'Type: <TYPE>, Number: <NUMBER>'. If the number is not visible, use 'UNKNOWN'.";
+            String promptText = "Analyze this image with the following objectives. Respond with each item on a new line in 'Key: Value' format.\n"
+                    + "1. **Type**: Identify if it is a 'TWO_WHEELER' or 'FOUR_WHEELER'.\n"
+                    + "2. **Number**: Extract the vehicle license plate number. Use 'UNKNOWN' if not visible.\n"
+                    + "3. **Make & Model**: Identify the make and model (e.g., 'Maruti Suzuki Swift').\n"
+                    + "4. **Generation/Year**: Estimate the production year or generation based on design cues.\n"
+                    + "5. **Damage Detection**: List any visible damage like dents, scratches, or broken parts.\n"
+                    + "6. **Tire Wear**: Briefly assess tire condition if visible.\n"
+                    + "7. **Damaged Parts**: Identify specific damaged parts (e.g., 'Left Front Fender').";
 
             Part textPart = new Part(promptText, null);
             Part imagePart = new Part(null, new InlineData(mimeType, base64Image));
@@ -201,17 +208,23 @@ public class VehicleEstimationService {
 
             String responseText = response.candidates().get(0).content().parts().get(0).text().trim();
 
+            // Log the full raw response for debugging and analysis
+            logger.info("Full Gemini Vehicle Nature Analysis:\n---\n{}\n---", responseText);
+
             String vehicleType = "UNKNOWN";
             String vehicleNumber = "UNKNOWN";
 
-            // Parse the response expecting "Type: ..., Number: ..."
+            // Basic parsing to extract core information needed by the application for now
             String[] parts = responseText.split("[,\\n]+");
             for (String part : parts) {
                 String trimmed = part.trim();
-                if (trimmed.startsWith("Type:")) {
-                    vehicleType = trimmed.substring(5).trim();
-                } else if (trimmed.startsWith("Number:")) {
-                    vehicleNumber = trimmed.substring(7).trim();
+                // Handle potential markdown (e.g., "**Type**:")
+                String cleanPart = trimmed.replaceAll("\\*\\*", "");
+
+                if (cleanPart.startsWith("Type:")) {
+                    vehicleType = cleanPart.substring(5).trim();
+                } else if (cleanPart.startsWith("Number:")) {
+                    vehicleNumber = cleanPart.substring(7).trim();
                 }
             }
 
@@ -221,10 +234,9 @@ public class VehicleEstimationService {
             if ("UNKNOWN".equals(vehicleType) && responseText.contains("FOUR_WHEELER"))
                 vehicleType = "FOUR_WHEELER";
 
-            logger.info("Gemini determined - Type: {}, Number: {}", vehicleType, vehicleNumber);
             return new VehicleAnalysisResult(vehicleType, vehicleNumber);
         } catch (Exception e) {
-            logger.error("Failed to call Gemini Vision API for vehicle type analysis.", e);
+            logger.error("Failed to call Gemini Vision API for vehicle nature analysis.", e);
             return null;
         }
     }
