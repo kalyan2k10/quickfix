@@ -40,24 +40,29 @@ public class ServiceRequestService {
 
     @Transactional
     public ServiceRequest createRequest(ServiceRequest request, MultipartFile image) {
-        if (image != null && !image.isEmpty()) {
-            String vehicleType = vehicleEstimationService.determineVehicleType(image);
-            request.setVehicleType(vehicleType);
+        VehicleEstimationService.VehicleInfoResult infoResult = vehicleEstimationService
+                .computeVehicleInfo(request.getVehicleNumber(), image);
+
+        if (infoResult != null) {
+            request.setVehicleType(infoResult.vehicleType());
+            // If the user didn't provide a number, but we got one from the image, save it.
+            if ((request.getVehicleNumber() == null || request.getVehicleNumber().isBlank())
+                    && infoResult.vehicleNumber() != null) {
+                request.setVehicleNumber(infoResult.vehicleNumber());
+            }
+            request.setEstimatedVehicleAge(infoResult.estimatedAge());
         }
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User requestingUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         request.setRequestingUser(requestingUser);
         request.setStatus(RequestStatus.OPEN);
-
         // --- Find the nearest vendor ---
         findAndSetNearestVendor(request, requestingUser);
 
         ServiceRequest savedRequest = requestRepository.save(request);
-        // Set the transient vehicle age property after saving
-        savedRequest
-                .setEstimatedVehicleAge(vehicleEstimationService.estimateVehicleAge(savedRequest.getVehicleNumber()));
         return savedRequest;
     }
 
@@ -148,8 +153,12 @@ public class ServiceRequestService {
     }
 
     private void setVehicleAge(ServiceRequest request) {
-        String estimatedAge = vehicleEstimationService.estimateVehicleAge(request.getVehicleNumber());
-        request.setEstimatedVehicleAge(estimatedAge);
+        // We don't have an image here, so we pass null.
+        VehicleEstimationService.VehicleInfoResult infoResult = vehicleEstimationService
+                .computeVehicleInfo(request.getVehicleNumber(), null);
+        if (infoResult != null) {
+            request.setEstimatedVehicleAge(infoResult.estimatedAge());
+        }
     }
 
     @Transactional

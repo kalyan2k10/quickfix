@@ -303,7 +303,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
                 className="form-input"
                 type="text" name="vehicleNumber"
                 placeholder="Vehicle Number (e.g., KA-01-AB-1234)"
-                value={newRequest.vehicleNumber} onChange={onInputChange} required />
+                value={newRequest.vehicleNumber} onChange={onInputChange} />
             <input
                 className="form-input"
                 type="text" name="name"

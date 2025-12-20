@@ -62,6 +62,12 @@ public class VehicleEstimationService {
     private record ModelInfo(String name, String displayName) {
     }
 
+    private record VehicleAnalysisResult(String vehicleType, String vehicleNumber) {
+    }
+
+    public record VehicleInfoResult(String vehicleType, String vehicleNumber, String estimatedAge) {
+    }
+
     @PostConstruct
     public void listAvailableModels() {
         logger.info("Fetching available Gemini models on startup...");
@@ -91,19 +97,34 @@ public class VehicleEstimationService {
         }
     }
 
-    /**
-     * Estimates the age of a vehicle by calling an external AI service.
-     * This is a blocking call for simplicity in this context.
-     *
-     * @param vehicleNumber The vehicle registration number.
-     * @return A string describing the estimated age, or null if not calculable.
-     */
-    public String estimateVehicleAge(String vehicleNumber) {
-        if (vehicleNumber == null || vehicleNumber.isBlank()) {
-            logger.warn("Vehicle number is null or blank. Cannot estimate age.");
-            return null;
+    public VehicleInfoResult computeVehicleInfo(String vehicleNumber, MultipartFile imageFile) {
+        String finalVehicleNumber = vehicleNumber;
+        String vehicleType = "UNKNOWN";
+        String estimatedAge = null;
+
+        // 1. Analyze image if provided
+        if (imageFile != null && !imageFile.isEmpty()) {
+            VehicleAnalysisResult analysisResult = determineVehicleType(imageFile);
+            if (analysisResult != null) {
+                vehicleType = analysisResult.vehicleType();
+                // If user didn't provide a number, use the one from the image
+                if ((finalVehicleNumber == null || finalVehicleNumber.isBlank())
+                        && !"UNKNOWN".equalsIgnoreCase(analysisResult.vehicleNumber())) {
+                    finalVehicleNumber = analysisResult.vehicleNumber();
+                }
+            }
         }
 
+        // 2. Estimate age if a vehicle number is available
+        if (finalVehicleNumber != null && !finalVehicleNumber.isBlank()
+                && !"UNKNOWN".equalsIgnoreCase(finalVehicleNumber)) {
+            estimatedAge = estimateVehicleAge(finalVehicleNumber);
+        }
+
+        return new VehicleInfoResult(vehicleType, finalVehicleNumber, estimatedAge);
+    }
+
+    private String estimateVehicleAge(String vehicleNumber) {
         // Check cache first
         if (vehicleAgeCache.containsKey(vehicleNumber)) {
             logger.info("Returning cached age for vehicle number: {}", vehicleNumber);
@@ -151,7 +172,7 @@ public class VehicleEstimationService {
         }
     }
 
-    public String determineVehicleType(MultipartFile imageFile) {
+    private VehicleAnalysisResult determineVehicleType(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             return null;
         }
@@ -201,7 +222,7 @@ public class VehicleEstimationService {
                 vehicleType = "FOUR_WHEELER";
 
             logger.info("Gemini determined - Type: {}, Number: {}", vehicleType, vehicleNumber);
-            return vehicleType;
+            return new VehicleAnalysisResult(vehicleType, vehicleNumber);
         } catch (Exception e) {
             logger.error("Failed to call Gemini Vision API for vehicle type analysis.", e);
             return null;
