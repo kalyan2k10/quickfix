@@ -62,10 +62,12 @@ public class VehicleEstimationService {
     private record ModelInfo(String name, String displayName) {
     }
 
-    private record VehicleAnalysisResult(String vehicleType, String vehicleNumber, String generationYear) {
+    private record VehicleAnalysisResult(String vehicleType, String vehicleNumber, String generationYear,
+            String makeModel, String damageDetection, String tireWear, String damagedParts) {
     }
 
-    public record VehicleInfoResult(String vehicleType, String vehicleNumber, String estimatedAge) {
+    public record VehicleInfoResult(String vehicleType, String vehicleNumber, String estimatedAge, String makeModel,
+            String damageDetection, String tireWear, String damagedParts) {
     }
 
     @PostConstruct
@@ -101,6 +103,10 @@ public class VehicleEstimationService {
         String finalVehicleNumber = vehicleNumber;
         String vehicleType = "UNKNOWN";
         String estimatedAge = null;
+        String makeModel = null;
+        String damageDetection = null;
+        String tireWear = null;
+        String damagedParts = null;
 
         // 1. Analyze image if provided
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -118,6 +124,10 @@ public class VehicleEstimationService {
                         && !"UNKNOWN".equalsIgnoreCase(analysisResult.generationYear())) {
                     estimatedAge = analysisResult.generationYear();
                 }
+                makeModel = analysisResult.makeModel();
+                damageDetection = analysisResult.damageDetection();
+                tireWear = analysisResult.tireWear();
+                damagedParts = analysisResult.damagedParts();
             }
         }
 
@@ -128,7 +138,8 @@ public class VehicleEstimationService {
             estimatedAge = estimateVehicleAge(finalVehicleNumber);
         }
 
-        return new VehicleInfoResult(vehicleType, finalVehicleNumber, estimatedAge);
+        return new VehicleInfoResult(vehicleType, finalVehicleNumber, estimatedAge, makeModel, damageDetection,
+                tireWear, damagedParts);
     }
 
     private String estimateVehicleAge(String vehicleNumber) {
@@ -221,6 +232,10 @@ public class VehicleEstimationService {
             String vehicleType = "UNKNOWN";
             String vehicleNumber = "UNKNOWN";
             String generationYear = null;
+            String makeModel = null;
+            String damageDetection = null;
+            String tireWear = null;
+            String damagedParts = null;
 
             // Basic parsing to extract core information needed by the application for now
             String[] parts = responseText.split("\\n");
@@ -235,6 +250,14 @@ public class VehicleEstimationService {
                     vehicleNumber = cleanPart.substring(7).trim();
                 } else if (cleanPart.startsWith("Generation/Year:")) {
                     generationYear = cleanPart.substring(16).trim();
+                } else if (cleanPart.startsWith("Make & Model:")) {
+                    makeModel = cleanPart.substring(13).trim();
+                } else if (cleanPart.startsWith("Damage Detection:")) {
+                    damageDetection = cleanPart.substring(17).trim();
+                } else if (cleanPart.startsWith("Tire Wear:")) {
+                    tireWear = cleanPart.substring(10).trim();
+                } else if (cleanPart.startsWith("Damaged Parts:")) {
+                    damagedParts = cleanPart.substring(14).trim();
                 }
             }
 
@@ -244,7 +267,8 @@ public class VehicleEstimationService {
             if ("UNKNOWN".equals(vehicleType) && responseText.contains("FOUR_WHEELER"))
                 vehicleType = "FOUR_WHEELER";
 
-            return new VehicleAnalysisResult(vehicleType, vehicleNumber, generationYear);
+            return new VehicleAnalysisResult(vehicleType, vehicleNumber, generationYear, makeModel, damageDetection,
+                    tireWear, damagedParts);
         } catch (Exception e) {
             logger.error("Failed to call Gemini Vision API for vehicle nature analysis.", e);
             return null;

@@ -40,6 +40,14 @@ public class ServiceRequest {
 
     private LocalDateTime lastRoutedAt;
 
+    private String makeModel;
+
+    private String damageDetection;
+
+    private String tireWear;
+
+    private String damagedParts;
+
     @Transient // This field is not persisted in the database
     @JsonProperty("estimatedVehicleAge")
     private String estimatedVehicleAge;
@@ -123,6 +131,38 @@ public class ServiceRequest {
 
     public void setLastRoutedAt(LocalDateTime lastRoutedAt) {
         this.lastRoutedAt = lastRoutedAt;
+    }
+
+    public String getMakeModel() {
+        return makeModel;
+    }
+
+    public void setMakeModel(String makeModel) {
+        this.makeModel = makeModel;
+    }
+
+    public String getDamageDetection() {
+        return damageDetection;
+    }
+
+    public void setDamageDetection(String damageDetection) {
+        this.damageDetection = damageDetection;
+    }
+
+    public String getTireWear() {
+        return tireWear;
+    }
+
+    public void setTireWear(String tireWear) {
+        this.tireWear = tireWear;
+    }
+
+    public String getDamagedParts() {
+        return damagedParts;
+    }
+
+    public void setDamagedParts(String damagedParts) {
+        this.damagedParts = damagedParts;
     }
 
     public String getEstimatedVehicleAge() {
