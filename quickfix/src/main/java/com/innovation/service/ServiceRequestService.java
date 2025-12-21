@@ -54,7 +54,6 @@ public class ServiceRequestService {
             request.setMakeModel(infoResult.makeModel());
             request.setDamageDetection(infoResult.damageDetection());
             request.setTireWear(infoResult.tireWear());
-            request.setDamagedParts(infoResult.damagedParts());
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

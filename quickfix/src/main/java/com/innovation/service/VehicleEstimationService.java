@@ -63,11 +63,11 @@ public class VehicleEstimationService {
     }
 
     private record VehicleAnalysisResult(String vehicleType, String vehicleNumber, String generationYear,
-            String makeModel, String damageDetection, String tireWear, String damagedParts) {
+            String makeModel, String damageDetection, String tireWear) {
     }
 
     public record VehicleInfoResult(String vehicleType, String vehicleNumber, String estimatedAge, String makeModel,
-            String damageDetection, String tireWear, String damagedParts) {
+            String damageDetection, String tireWear) {
     }
 
     @PostConstruct
@@ -106,7 +106,6 @@ public class VehicleEstimationService {
         String makeModel = null;
         String damageDetection = null;
         String tireWear = null;
-        String damagedParts = null;
 
         // 1. Analyze image if provided
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -127,7 +126,6 @@ public class VehicleEstimationService {
                 makeModel = analysisResult.makeModel();
                 damageDetection = analysisResult.damageDetection();
                 tireWear = analysisResult.tireWear();
-                damagedParts = analysisResult.damagedParts();
             }
         }
 
@@ -139,7 +137,7 @@ public class VehicleEstimationService {
         }
 
         return new VehicleInfoResult(vehicleType, finalVehicleNumber, estimatedAge, makeModel, damageDetection,
-                tireWear, damagedParts);
+                tireWear);
     }
 
     private String estimateVehicleAge(String vehicleNumber) {
@@ -205,8 +203,7 @@ public class VehicleEstimationService {
                     + "3. **Make & Model**: Identify the make and model (e.g., 'Maruti Suzuki Swift').\n"
                     + "4. **Generation/Year**: Estimate the production year or generation based on design cues.\n"
                     + "5. **Damage Detection**: List any visible damage like dents, scratches, or broken parts.\n"
-                    + "6. **Tire Wear**: Briefly assess tire condition if visible.\n"
-                    + "7. **Damaged Parts**: Identify specific damaged parts (e.g., 'Left Front Fender').";
+                    + "6. **Tire Wear**: Briefly assess tire condition if visible.";
 
             Part textPart = new Part(promptText, null);
             Part imagePart = new Part(null, new InlineData(mimeType, base64Image));
@@ -235,7 +232,6 @@ public class VehicleEstimationService {
             String makeModel = null;
             String damageDetection = null;
             String tireWear = null;
-            String damagedParts = null;
 
             // Basic parsing to extract core information needed by the application for now
             String[] parts = responseText.split("\\n");
@@ -251,13 +247,20 @@ public class VehicleEstimationService {
                 } else if (cleanPart.startsWith("Generation/Year:")) {
                     generationYear = cleanPart.substring(16).trim();
                 } else if (cleanPart.startsWith("Make & Model:")) {
-                    makeModel = cleanPart.substring(13).trim();
+                    String val = cleanPart.substring(13).trim();
+                    if (!val.isEmpty() && !"UNKNOWN".equalsIgnoreCase(val)) {
+                        makeModel = val;
+                    }
                 } else if (cleanPart.startsWith("Damage Detection:")) {
-                    damageDetection = cleanPart.substring(17).trim();
+                    String val = cleanPart.substring(17).trim();
+                    if (!val.isEmpty() && !"UNKNOWN".equalsIgnoreCase(val)) {
+                        damageDetection = val;
+                    }
                 } else if (cleanPart.startsWith("Tire Wear:")) {
-                    tireWear = cleanPart.substring(10).trim();
-                } else if (cleanPart.startsWith("Damaged Parts:")) {
-                    damagedParts = cleanPart.substring(14).trim();
+                    String val = cleanPart.substring(10).trim();
+                    if (!val.isEmpty() && !"UNKNOWN".equalsIgnoreCase(val)) {
+                        tireWear = val;
+                    }
                 }
             }
 
@@ -268,7 +271,7 @@ public class VehicleEstimationService {
                 vehicleType = "FOUR_WHEELER";
 
             return new VehicleAnalysisResult(vehicleType, vehicleNumber, generationYear, makeModel, damageDetection,
-                    tireWear, damagedParts);
+                    tireWear);
         } catch (Exception e) {
             logger.error("Failed to call Gemini Vision API for vehicle nature analysis.", e);
             return null;

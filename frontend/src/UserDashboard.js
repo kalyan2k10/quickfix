@@ -239,7 +239,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         </div>
         
         {/* Vehicle Analysis Details */}
-        {(activeRequest.makeModel || activeRequest.damageDetection || activeRequest.damagedParts || activeRequest.tireWear || activeRequest.vehicleType || activeRequest.estimatedVehicleAge) && (
+        {(activeRequest.makeModel || activeRequest.damageDetection || activeRequest.tireWear || activeRequest.vehicleType || activeRequest.estimatedVehicleAge) && (
           <div className="vehicle-analysis-details" style={{ marginBottom: '15px', textAlign: 'left', color: 'inherit' }}>
             <h4 style={{ margin: '0 0 5px 0', color: 'inherit' }}>AI Vehicle Analysis:</h4>
             <ul style={{ margin: 0, paddingLeft: '20px', textAlign: 'left' }}>
@@ -247,7 +247,6 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               {activeRequest.estimatedVehicleAge && <li><strong>Year/Generation:</strong> {activeRequest.estimatedVehicleAge}</li>}
               {activeRequest.makeModel && <li><strong>Make/Model:</strong> {activeRequest.makeModel}</li>}
               {activeRequest.damageDetection && <li><strong>Damage:</strong> {activeRequest.damageDetection}</li>}
-              {activeRequest.damagedParts && <li><strong>Parts:</strong> {activeRequest.damagedParts}</li>}
               {activeRequest.tireWear && <li><strong>Tire Wear:</strong> {activeRequest.tireWear}</li>}
             </ul>
           </div>
