@@ -62,7 +62,7 @@ public class VehicleEstimationService {
     private record ModelInfo(String name, String displayName) {
     }
 
-    private record VehicleAnalysisResult(String vehicleType, String vehicleNumber) {
+    private record VehicleAnalysisResult(String vehicleType, String vehicleNumber, String generationYear) {
     }
 
     public record VehicleInfoResult(String vehicleType, String vehicleNumber, String estimatedAge) {
@@ -106,17 +106,24 @@ public class VehicleEstimationService {
         if (imageFile != null && !imageFile.isEmpty()) {
             VehicleAnalysisResult analysisResult = determineVehicleNature(imageFile);
             if (analysisResult != null) {
-                vehicleType = analysisResult.vehicleType();
+                if (analysisResult.vehicleType() != null) {
+                    vehicleType = analysisResult.vehicleType();
+                }
                 // If user didn't provide a number, use the one from the image
                 if ((finalVehicleNumber == null || finalVehicleNumber.isBlank())
                         && !"UNKNOWN".equalsIgnoreCase(analysisResult.vehicleNumber())) {
                     finalVehicleNumber = analysisResult.vehicleNumber();
                 }
+                if (analysisResult.generationYear() != null && !analysisResult.generationYear().isBlank()
+                        && !"UNKNOWN".equalsIgnoreCase(analysisResult.generationYear())) {
+                    estimatedAge = analysisResult.generationYear();
+                }
             }
         }
 
-        // 2. Estimate age if a vehicle number is available
-        if (finalVehicleNumber != null && !finalVehicleNumber.isBlank()
+        // 2. Estimate age if a vehicle number is available and we don't already have an
+        // age
+        if (estimatedAge == null && finalVehicleNumber != null && !finalVehicleNumber.isBlank()
                 && !"UNKNOWN".equalsIgnoreCase(finalVehicleNumber)) {
             estimatedAge = estimateVehicleAge(finalVehicleNumber);
         }
@@ -213,9 +220,10 @@ public class VehicleEstimationService {
 
             String vehicleType = "UNKNOWN";
             String vehicleNumber = "UNKNOWN";
+            String generationYear = null;
 
             // Basic parsing to extract core information needed by the application for now
-            String[] parts = responseText.split("[,\\n]+");
+            String[] parts = responseText.split("\\n");
             for (String part : parts) {
                 String trimmed = part.trim();
                 // Handle potential markdown (e.g., "**Type**:")
@@ -225,6 +233,8 @@ public class VehicleEstimationService {
                     vehicleType = cleanPart.substring(5).trim();
                 } else if (cleanPart.startsWith("Number:")) {
                     vehicleNumber = cleanPart.substring(7).trim();
+                } else if (cleanPart.startsWith("Generation/Year:")) {
+                    generationYear = cleanPart.substring(16).trim();
                 }
             }
 
@@ -234,7 +244,7 @@ public class VehicleEstimationService {
             if ("UNKNOWN".equals(vehicleType) && responseText.contains("FOUR_WHEELER"))
                 vehicleType = "FOUR_WHEELER";
 
-            return new VehicleAnalysisResult(vehicleType, vehicleNumber);
+            return new VehicleAnalysisResult(vehicleType, vehicleNumber, generationYear);
         } catch (Exception e) {
             logger.error("Failed to call Gemini Vision API for vehicle nature analysis.", e);
             return null;
