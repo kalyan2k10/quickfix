@@ -239,7 +239,7 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
         </div>
         
         {/* Vehicle Analysis Details */}
-        {(activeRequest.makeModel || activeRequest.damageDetection || activeRequest.tireWear || activeRequest.vehicleType || activeRequest.estimatedVehicleAge) && (
+        {(activeRequest.makeModel || activeRequest.damageDetection || activeRequest.tireWear || activeRequest.vehicleType || activeRequest.estimatedVehicleAge || activeRequest.damageSeverity || activeRequest.estimatedCostRange) && (
           <div className="vehicle-analysis-details" style={{ marginBottom: '15px', textAlign: 'left', color: 'inherit' }}>
             <h4 style={{ margin: '0 0 5px 0', color: 'inherit' }}>AI Vehicle Analysis:</h4>
             <ul style={{ margin: 0, paddingLeft: '20px', textAlign: 'left' }}>
@@ -248,6 +248,8 @@ const UserDashboard = ({ newRequest, onInputChange, onRequestSubmit, vendorsWith
               {activeRequest.makeModel && <li><strong>Make/Model:</strong> {activeRequest.makeModel}</li>}
               {activeRequest.damageDetection && <li><strong>Damage:</strong> {activeRequest.damageDetection}</li>}
               {activeRequest.tireWear && <li><strong>Tire Wear:</strong> {activeRequest.tireWear}</li>}
+              {activeRequest.damageSeverity && <li><strong>Severity:</strong> {activeRequest.damageSeverity}</li>}
+              {activeRequest.estimatedCostRange && <li><strong>Est. Cost:</strong> {activeRequest.estimatedCostRange}</li>}
             </ul>
           </div>
         )}

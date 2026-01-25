@@ -46,6 +46,10 @@ public class ServiceRequest {
 
     private String tireWear;
 
+    private String damageSeverity;
+
+    private String estimatedCostRange;
+
     @Transient // This field is not persisted in the database
     @JsonProperty("estimatedVehicleAge")
     private String estimatedVehicleAge;
@@ -153,6 +157,22 @@ public class ServiceRequest {
 
     public void setTireWear(String tireWear) {
         this.tireWear = tireWear;
+    }
+
+    public String getDamageSeverity() {
+        return damageSeverity;
+    }
+
+    public void setDamageSeverity(String damageSeverity) {
+        this.damageSeverity = damageSeverity;
+    }
+
+    public String getEstimatedCostRange() {
+        return estimatedCostRange;
+    }
+
+    public void setEstimatedCostRange(String estimatedCostRange) {
+        this.estimatedCostRange = estimatedCostRange;
     }
 
     public String getEstimatedVehicleAge() {
